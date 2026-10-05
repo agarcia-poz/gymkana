@@ -50,6 +50,7 @@
   .clock small { display: block; font-size: 11.5px; opacity: .75; }
   .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; opacity: .85; }
   .live i { width: 8px; height: 8px; border-radius: 50%; background: #5AD38A; box-shadow: 0 0 0 3px rgba(90,211,138,.25); }
+  .live.warn i { background: #F5B942; box-shadow: 0 0 0 3px rgba(245,185,66,.3); }
   .live.off i { background: #E57373; box-shadow: 0 0 0 3px rgba(229,115,115,.25); }
   nav { display: flex; gap: 2px; padding: 0 20px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 58px; z-index: 4; overflow-x: auto; }
   nav button { background: none; border: none; padding: 12px 14px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; position: relative; }
@@ -389,17 +390,36 @@
 var A = { pin: null, url: '', ver: 0, data: null, puntos: null, teams: null, sel: null, skew: 0, tab: 'seg' };
 function $(id) { return document.getElementById(id); }
 function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
-function api(fn) {
-  var args = Array.prototype.slice.call(arguments, 1);
+function idCliente() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function llamarApi(fn, args, ms) {
   var url = window.GYMKANA_API || '';
   if (!url || /PEGA_AQUI/.test(url)) return Promise.reject(new Error('Falta configurar la dirección de Apps Script en config.js.'));
-  var ctrl = window.AbortController ? new AbortController() : null, tm = ctrl && setTimeout(function () { ctrl.abort(); }, 60000);
+  var ctrl = window.AbortController ? new AbortController() : null, tm = ctrl && setTimeout(function () { ctrl.abort(); }, ms);
+  var red = function (msg) { var e = new Error(msg); e.red = true; return e; };
   // text/plain evita la petición previa de CORS; Apps Script la acepta igual
   return fetch(url, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ fn: fn, args: args }), signal: ctrl ? ctrl.signal : undefined })
-    .then(function (r) { if (!r.ok) throw new Error('Sin conexión con el servidor (' + r.status + ')'); return r.json(); })
-    .then(function (j) { clearTimeout(tm); if (!j.ok) throw new Error(j.error); return j.result; })
-    .catch(function (e) { clearTimeout(tm); if (e && e.name === 'AbortError') throw new Error('El servidor tarda en responder. Inténtalo de nuevo.'); if (e instanceof SyntaxError) throw new Error('No se puede leer la respuesta del servidor. Revisa que la aplicación web esté publicada para «Cualquier usuario».'); if (e instanceof TypeError) throw new Error('No hay conexión con el servidor. Comprueba la conexión a internet.'); throw e; });
+    .then(function (r) { if (!r.ok) throw red('El servidor no responde (' + r.status + ')'); return r.text(); })
+    .then(function (t) { clearTimeout(tm); var j; try { j = JSON.parse(t); } catch (x) { throw red('Respuesta no válida del servidor. Si se repite, revisa que la aplicación web esté publicada para «Cualquier usuario».'); } if (!j.ok) throw new Error(j.error); return j.result; })
+    .catch(function (e) {
+      clearTimeout(tm);
+      if (e && e.red) throw e;
+      if (e && e.name === 'AbortError') throw red('El servidor tarda en responder.');
+      if (e instanceof TypeError) throw red('No hay conexión con el servidor.');
+      throw e;
+    });
+}
+// Reintenta en silencio los cortes puntuales de Apps Script (hasta 3 veces, con espera creciente)
+function api(fn) {
+  var args = Array.prototype.slice.call(arguments, 1), n = 0;
+  var ms = /Template|Save|Get(Template)/.test(fn) ? 90000 : 25000;
+  function intento() {
+    return llamarApi(fn, args, ms).catch(function (e) {
+      if (e.red && n < 3) { n++; return new Promise(function (r) { setTimeout(r, 800 * n + Math.random() * 600); }).then(intento); }
+      throw e;
+    });
+  }
+  return intento();
 }
 function adm(fn) { var a = Array.prototype.slice.call(arguments, 1); return api.apply(null, [fn, A.pin].concat(a)); }
 function toast(t) { var x = $('toast'); x.textContent = t; x.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function () { x.classList.remove('on'); }, 3000); }
@@ -415,18 +435,20 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.05-f') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.05-g') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
     $('baseUrl').value = localStorageGet('pdv_url') || A.url;
-    refresh(true).then(function () { var u = A.data && A.data.config && A.data.config.urlEquipos; if (u) $('baseUrl').value = u; }); setInterval(refresh, 4000); setInterval(tick, 1000);
+    refresh(true).then(function () { var u = A.data && A.data.config && A.data.config.urlEquipos; if (u) $('baseUrl').value = u; });
+    (function bucle() { setTimeout(function () { refresh().then(bucle, bucle); }, A.fallos ? Math.min(20000, 5000 * (1 + A.fallos)) : 5000); })();
+    setInterval(tick, 1000);
   }).catch(function (e) { $('loginBtn').disabled = false; $('loginErr').textContent = clean(e); sstore('pdv_pin', ''); });
 }
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.05-f, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.05-g, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -457,7 +479,7 @@ function refresh(force) {
   A.busy = true;
   return adm('adminDashboard', force ? 0 : A.ver).then(function (d) {
     A.busy = false;
-    $('live').classList.remove('off'); $('liveTxt').textContent = 'En directo'; $('live').title = ''; A.ultimoError = null;
+    $('live').classList.remove('off', 'warn'); $('liveTxt').textContent = 'En directo'; $('live').title = ''; A.ultimoError = null; A.fallos = 0;
     A.skew = d.ahora - Date.now();
     if (d.same) { if (d.vistos && A.data) A.data.equipos.forEach(function (t) { t.visto = d.vistos[t.codigo] || t.visto; }); pintarSeguimiento(); return; }
     A.ver = d.ver; A.data = d;
@@ -465,8 +487,12 @@ function refresh(force) {
   }).catch(function (e) {
     A.busy = false;
     var msg = clean(e);
-    $('live').classList.add('off'); $('liveTxt').textContent = 'Sin conexión'; $('live').title = msg;
-    if (msg !== A.ultimoError) { A.ultimoError = msg; toast('Sin conexión: ' + msg); }
+    if (e && e.red) {
+      A.fallos = (A.fallos || 0) + 1;
+      $('live').title = msg;
+      if (A.fallos < 3) { $('live').classList.add('warn'); $('live').classList.remove('off'); $('liveTxt').textContent = 'Reconectando…'; }
+      else { $('live').classList.add('off'); $('liveTxt').textContent = 'Sin conexión'; if (msg !== A.ultimoError) { A.ultimoError = msg; toast('Sin conexión: ' + msg + ' Se sigue intentando automáticamente.'); } }
+    } else { $('live').classList.add('off'); $('liveTxt').textContent = 'Error'; $('live').title = msg; if (msg !== A.ultimoError) { A.ultimoError = msg; toast(msg); } }
     if (/PIN/.test(clean(e))) { sstore('pdv_pin', ''); location.reload(); }
   });
 }
@@ -513,7 +539,7 @@ $('bcTop').onclick = function () {
   var c = el('button', 'btn', 'Cancelar'); c.onclick = cerrarModal;
   var ok = el('button', 'btn alert', 'Enviar a todos'); ok.onclick = function () {
     var t = ta.value.trim(); if (!t) return; ok.disabled = true;
-    adm('adminSend', '*', t).then(function () { cerrarModal(); toast('Aviso enviado a todos los equipos'); refresh(true); }).catch(function (e) { ok.disabled = false; toast(clean(e)); });
+    adm('adminSend', '*', t, idCliente()).then(function () { cerrarModal(); toast('Aviso enviado a todos los equipos'); refresh(true); }).catch(function (e) { ok.disabled = false; toast(clean(e)); });
   };
   r.appendChild(c); r.appendChild(ok); box.appendChild(r); $('modal').classList.remove('hidden'); setTimeout(function () { ta.focus(); }, 50);
 };
@@ -678,7 +704,7 @@ function pintarHilo() {
 function enviarAdmin(texto) {
   texto = String(texto || '').trim(); if (!texto || !A.sel) return;
   A.data.mensajes.push({ id: 'tmp', ts: now(), equipo: A.sel, de: 'admin', texto: texto, leido: true }); pintarHilo();
-  adm('adminSend', A.sel, texto).then(function () { refresh(true); }).catch(function (e) { toast(clean(e)); });
+  adm('adminSend', A.sel, texto, idCliente()).then(function () { refresh(true); }).catch(function (e) { toast(clean(e)); });
 }
 $('thSend').onclick = function () { enviarAdmin($('thTxt').value); $('thTxt').value = ''; };
 $('thTxt').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('thSend').onclick(); } };
@@ -1010,7 +1036,7 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.05-f · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.05-g · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
 }
@@ -1020,7 +1046,7 @@ $('saveCfg').onclick = function () {
 };
 $('bcSend').onclick = function () {
   var t = $('bcTxt').value.trim(); if (!t) return;
-  adm('adminSend', '*', t).then(function () { $('bcTxt').value = ''; toast('Aviso enviado a todos los equipos'); refresh(true); }).catch(function (e) { toast(clean(e)); });
+  adm('adminSend', '*', t, idCliente()).then(function () { $('bcTxt').value = ''; toast('Aviso enviado a todos los equipos'); refresh(true); }).catch(function (e) { toast(clean(e)); });
 };
 $('reopenBtn').onclick = function () { adm('adminReopen').then(function () { toast('Actividad reabierta'); refresh(true); }).catch(function (e) { toast(clean(e)); }); };
 $('resetBtn').onclick = function () {

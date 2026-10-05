@@ -149,6 +149,8 @@
   .scanner .bottom p { margin: 0 0 14px; font-size: 16px; }
   .scanner .bottom .btn { background: #fff; color: var(--navy); }
   .scanner .status { min-height: 22px; color: #BFE0FF; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .net { position: fixed; top: 0; left: 0; right: 0; z-index: 35; background: #FFF3DC; color: #7A4B00; text-align: center; font-weight: 700; font-size: 14px; padding: 6px 10px; display: none; }
+  .net.on { display: block; }
   .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); background: var(--navy); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 15px; z-index: 40; display: none; max-width: 90%; text-align: center; }
   .toast.on { display: block; animation: pop .3s ease; }
 </style>
@@ -218,6 +220,7 @@
   <div class="txt" id="alertTxt"></div>
   <div class="row"><button class="ghost hidden" id="alertReply">Responder</button><button id="alertOk">Entendido</button></div>
 </div>
+<div class="net" id="net">📶 Conexión inestable: reconectando…</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -228,21 +231,40 @@
   // Se limpia la dirección para que recargar la página no vuelva a escanear el mismo QR
   if (INIT.q || INIT.t) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
   var KEY = 'pdv_equipo';
-  var POLL_MS = 4000;
+  var POLL_MS = 5000;
   var S = { codigo: null, equipo: null, ver: 0, ultimoTs: -1, pantalla: null, mensajes: [], chatOpen: false, poll: null, busy: false, cola: [] };
 
   function $(id) { return document.getElementById(id); }
-  function api(fn) {
-    var args = Array.prototype.slice.call(arguments, 1);
+  function idCliente() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function llamarApi(fn, args, ms) {
     var url = window.GYMKANA_API || '';
     if (!url || /PEGA_AQUI/.test(url)) return Promise.reject(new Error('Falta configurar la dirección de Apps Script en config.js.'));
-    var ctrl = window.AbortController ? new AbortController() : null, tm = ctrl && setTimeout(function () { ctrl.abort(); }, 20000);
+    var ctrl = window.AbortController ? new AbortController() : null, tm = ctrl && setTimeout(function () { ctrl.abort(); }, ms);
+    var red = function (msg) { var e = new Error(msg); e.red = true; return e; };
     // text/plain evita la petición previa de CORS; Apps Script la acepta igual
     return fetch(url, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ fn: fn, args: args }), signal: ctrl ? ctrl.signal : undefined })
-      .then(function (r) { if (!r.ok) throw new Error('Sin conexión con el servidor (' + r.status + ')'); return r.json(); })
-      .then(function (j) { clearTimeout(tm); if (!j.ok) throw new Error(j.error); return j.result; })
-      .catch(function (e) { clearTimeout(tm); if (e && e.name === 'AbortError') throw new Error('El servidor tarda en responder. Inténtalo de nuevo.'); if (e instanceof SyntaxError) throw new Error('No se puede leer la respuesta del servidor. Revisa que la aplicación web esté publicada para «Cualquier usuario».'); if (e instanceof TypeError) throw new Error('No hay conexión con el servidor. Comprueba la conexión a internet.'); throw e; });
+      .then(function (r) { if (!r.ok) throw red('El servidor no responde (' + r.status + ')'); return r.text(); })
+      .then(function (t) { clearTimeout(tm); var j; try { j = JSON.parse(t); } catch (x) { throw red('Respuesta no válida del servidor. Si se repite, revisa que la aplicación web esté publicada para «Cualquier usuario».'); } if (!j.ok) throw new Error(j.error); return j.result; })
+      .catch(function (e) {
+        clearTimeout(tm);
+        if (e && e.red) throw e;
+        if (e && e.name === 'AbortError') throw red('El servidor tarda en responder.');
+        if (e instanceof TypeError) throw red('No hay conexión con el servidor.');
+        throw e;
+      });
+  }
+  // Reintenta en silencio los cortes puntuales de Apps Script (hasta 3 veces, con espera creciente)
+  function api(fn) {
+    var args = Array.prototype.slice.call(arguments, 1), n = 0;
+    var ms = /Template|Save|Get(Template)/.test(fn) ? 90000 : 25000;
+    function intento() {
+      return llamarApi(fn, args, ms).catch(function (e) {
+        if (e.red && n < 3) { n++; return new Promise(function (r) { setTimeout(r, 800 * n + Math.random() * 600); }).then(intento); }
+        throw e;
+      });
+    }
+    return intento();
   }
   var MEM = {};
   function store(k, v) {
@@ -424,20 +446,27 @@
     }
   }
 
-  function arrancarPoll() { if (S.poll) return; S.poll = setInterval(poll, POLL_MS); setTimeout(poll, 1200); }
+  // Sondeo con espera progresiva: si hay cortes, se espacian las consultas y se avisa discretamente
+  S.fallos = 0;
+  function arrancarPoll() { if (S.poll) return; S.poll = true; setTimeout(bucle, 1200); }
+  function bucle() { poll(); setTimeout(bucle, S.fallos ? Math.min(20000, POLL_MS * (1 + S.fallos)) : POLL_MS); }
+  function red(ok) {
+    if (ok) { S.fallos = 0; $('net').classList.remove('on'); return; }
+    S.fallos++; if (S.fallos >= 2) $('net').classList.add('on');
+  }
   function poll() {
     if (!S.codigo || document.hidden || S.busy) return;
     S.busy = true;
     var enEspera = S.pantalla === 'espera';
     api('apiState', S.codigo, S.ver, enEspera).then(function (r) {
-      S.busy = false;
+      S.busy = false; red(true);
       if (r.same) { if (enEspera && r.conectados !== undefined) pintarConectados(r.conectados, S.totalEquipos); return; }
       S.ver = r.ver;
       var especial = function (p) { return p === 'espera' || p === 'terminada'; };
       if (r.ultimoTs !== S.ultimoTs || r.pantalla !== S.pantalla && (especial(r.pantalla) || especial(S.pantalla))) mostrar(r);
       else { pintarCabecera(r); if (r.pantalla === 'espera') pintarConectados(r.conectados, r.totalEquipos); }
       procesarMensajes(r.mensajes || []);
-    }).catch(function () { S.busy = false; });
+    }).catch(function (e) { S.busy = false; if (e && e.red) red(false); });
   }
   document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
 
@@ -502,7 +531,7 @@
   function enviar(texto) {
     texto = String(texto || '').trim(); if (!texto) return;
     S.mensajes.push({ id: 'tmp' + Date.now(), ts: Date.now(), equipo: S.codigo, de: 'equipo', texto: texto }); pintarChat();
-    api('apiSend', S.codigo, texto).then(function () { setTimeout(poll, 300); }).catch(function (e) { toast('No se ha podido enviar: ' + cleanMsg(e)); });
+    api('apiSend', S.codigo, texto, idCliente()).then(function () { setTimeout(poll, 300); }).catch(function (e) { toast('No se ha podido enviar: ' + cleanMsg(e)); });
   }
   $('openChat').onclick = function () { S.chatOpen = true; $('sheet').classList.add('on'); pintarChat(); marcarVisto(); setTimeout(function () { $('txt').focus(); }, 250); };
   $('closeChat').onclick = function () { S.chatOpen = false; $('sheet').classList.remove('on'); };
