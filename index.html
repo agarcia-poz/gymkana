@@ -10,6 +10,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B4FA8'/%3E%3Cpath d='M16 22h10a6 6 0 1 1 12 0h10v10a6 6 0 1 1 0 12v10H16z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <style>
   :root {
@@ -220,12 +221,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ┌─────────────────────────────────────────────────────────────────────────┐
-  // │  CONFIGURACIÓN: pega aquí la URL de la aplicación web de Apps Script      │
-  // │  (la que termina en /exec). Es lo único que hay que cambiar.               │
-  // └─────────────────────────────────────────────────────────────────────────┘
-  var API_URL = 'PEGA_AQUI_LA_URL_DE_APPS_SCRIPT/exec';
-
   var INIT = (function () {
     var p = new URLSearchParams(location.search), limpio = function (v) { return String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 20); };
     return { q: limpio(p.get('q')).toUpperCase(), t: limpio(p.get('t')).toUpperCase() };
@@ -239,14 +234,15 @@
   function $(id) { return document.getElementById(id); }
   function api(fn) {
     var args = Array.prototype.slice.call(arguments, 1);
-    if (/PEGA_AQUI/.test(API_URL)) return Promise.reject(new Error('Falta configurar la dirección de Apps Script en la página (API_URL).'));
+    var url = window.GYMKANA_API || '';
+    if (!url || /PEGA_AQUI/.test(url)) return Promise.reject(new Error('Falta configurar la dirección de Apps Script en config.js.'));
     var ctrl = window.AbortController ? new AbortController() : null, tm = ctrl && setTimeout(function () { ctrl.abort(); }, 20000);
     // text/plain evita la petición previa de CORS; Apps Script la acepta igual
-    return fetch(API_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    return fetch(url, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ fn: fn, args: args }), signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { if (!r.ok) throw new Error('Sin conexión con el servidor (' + r.status + ')'); return r.json(); })
       .then(function (j) { clearTimeout(tm); if (!j.ok) throw new Error(j.error); return j.result; })
-      .catch(function (e) { clearTimeout(tm); if (e && e.name === 'AbortError') throw new Error('El servidor tarda en responder. Inténtalo de nuevo.'); if (e instanceof SyntaxError) throw new Error('La app no puede leer la respuesta del servidor. Revisa que la aplicación web esté publicada para «Cualquier usuario».'); if (e instanceof TypeError) throw new Error('No hay conexión con el servidor. Comprobad la cobertura o el wifi e intentadlo de nuevo.'); throw e; });
+      .catch(function (e) { clearTimeout(tm); if (e && e.name === 'AbortError') throw new Error('El servidor tarda en responder. Inténtalo de nuevo.'); if (e instanceof SyntaxError) throw new Error('No se puede leer la respuesta del servidor. Revisa que la aplicación web esté publicada para «Cualquier usuario».'); if (e instanceof TypeError) throw new Error('No hay conexión con el servidor. Comprueba la conexión a internet.'); throw e; });
   }
   var MEM = {};
   function store(k, v) {

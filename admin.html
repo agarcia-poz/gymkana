@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Panel · Piezas de una vocación</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B2E6B'/%3E%3Cpath d='M16 22h10a6 6 0 1 1 12 0h10v10a6 6 0 1 1 0 12v10H16z' fill='%23fff'/%3E%3C/svg%3E">
+<script src="config.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
+  :root {
+    --navy: #0B2E6B; --navy-2: #0B4FA8; --gold: #1E88E5; --gold-soft: #E3F0FC;
+    --bg: #F3F8FE; --paper: #FFFFFF; --ink: #0F1E36; --muted: #5A6B85; --line: #D6E5F5; --line-2: #EAF2FB;
+    --ok: #1F8A55; --ok-soft: #E6F6EE; --warn: #B26A00; --warn-soft: #FFF3DC; --err: #C62828; --err-soft: #FDE7E7; --info-soft: #E3F0FC;
+    --grad: linear-gradient(135deg, #0B2E6B 0%, #0B4FA8 55%, #1E88E5 100%);
+    --logo: url(data:image/png;base64,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);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Nunito Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .hidden { display: none !important; }
+  /* login */
+  .login { min-height: 100vh; display: grid; place-items: center; padding: 20px; background: radial-gradient(900px 500px at 85% -10%, #CFE6FB 0%, rgba(207,230,251,0) 60%), linear-gradient(180deg, #FFFFFF, #E4F1FD); }
+  .login .box { background: var(--paper); border-radius: 18px; padding: 30px; width: 100%; max-width: 380px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5); }
+  .login h1 { font-family: 'Poppins', sans-serif; margin: 4px 0 4px; font-size: 26px; }
+  .login p { color: var(--muted); margin: 0 0 18px; }
+  .login input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 22px; letter-spacing: .3em; text-align: center; }
+  .eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  /* layout */
+  .top { position: sticky; top: 0; z-index: 5; background: var(--grad); color: #fff; display: flex; align-items: center; gap: 16px; padding: 10px 20px; }
+  .top .logo { width: 64px; aspect-ratio: 480 / 296; background: #fff; -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat; flex: none; }
+  .login .logo { width: 110px; aspect-ratio: 480 / 296; background: var(--navy-2); -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat; margin-bottom: 10px; }
+  .btn.end { background: rgba(255,255,255,.14); color: #fff; border-color: rgba(255,255,255,.5); }
+  .endchip { background: rgba(255,255,255,.18); border-radius: 99px; padding: 4px 12px; font-weight: 700; font-size: 13px; }
+  .design { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; align-items: start; }
+  .design canvas { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
+  .design label.r { display: block; font-weight: 600; margin: 12px 0 4px; }
+  .design input[type=range] { width: 100%; }
+  @media (max-width: 900px) { .design { grid-template-columns: 1fr; } }
+  .top .brand { font-family: 'Poppins', sans-serif; font-weight: 700; letter-spacing: .04em; }
+  .top .brand small { display: block; font-family: 'Nunito Sans'; font-weight: 600; color: #CFE6FB; letter-spacing: 0; font-size: 12.5px; }
+  .clock { margin-left: auto; text-align: right; }
+  .clock b { font-variant-numeric: tabular-nums; font-size: 22px; font-family: 'Poppins', sans-serif; }
+  .clock small { display: block; font-size: 11.5px; opacity: .75; }
+  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; opacity: .85; }
+  .live i { width: 8px; height: 8px; border-radius: 50%; background: #5AD38A; box-shadow: 0 0 0 3px rgba(90,211,138,.25); }
+  .live.off i { background: #E57373; box-shadow: 0 0 0 3px rgba(229,115,115,.25); }
+  nav { display: flex; gap: 2px; padding: 0 20px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 58px; z-index: 4; overflow-x: auto; }
+  nav button { background: none; border: none; padding: 12px 14px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; position: relative; }
+  nav button.on { color: var(--navy); border-bottom-color: var(--gold); }
+  nav .count { display: inline-grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; background: var(--err); color: #fff; font-size: 11.5px; margin-left: 6px; }
+  .wrap { padding: 20px; max-width: 1400px; margin: 0 auto; }
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .grow { flex: 1; }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .card h2 { font-family: 'Poppins', sans-serif; font-size: 19px; margin: 0 0 4px; }
+  .card .sub { color: var(--muted); margin: 0 0 12px; font-size: 14px; }
+  .btn { border: 1px solid var(--line); background: var(--paper); padding: 8px 14px; border-radius: 9px; font-weight: 600; }
+  .btn:hover { border-color: #CFC7B4; }
+  .btn.primary { background: var(--grad); color: #fff; border-color: var(--navy-2); }
+  .btn.gold { background: var(--gold); color: #fff; border-color: var(--gold); }
+  .top .btn.gold { background: #fff; color: var(--navy); border-color: #fff; }
+  .btn.danger { color: var(--err); border-color: #EBC4BF; }
+  .btn.sm { padding: 5px 10px; font-size: 13.5px; }
+  .btn[disabled] { opacity: .5; cursor: default; }
+  input.f, select.f, textarea.f { border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; background: #fff; width: 100%; }
+  textarea.f { resize: vertical; min-height: 64px; }
+  input.f:focus, select.f:focus, textarea.f:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(31,56,100,.12); }
+  /* KPI */
+  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .kpi b { display: block; font-family: 'Poppins', sans-serif; font-size: 30px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kpi.alert b { color: var(--err); } .kpi.done b { color: var(--ok); } .kpi.msg b { color: var(--warn); }
+  /* tabla equipos */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--line); background: #FBF9F4; position: sticky; top: 0; }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line-2); vertical-align: middle; }
+  tr:hover td { background: #FDFCF8; }
+  .tname { display: flex; align-items: center; gap: 9px; font-weight: 700; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; color: var(--muted); letter-spacing: .08em; font-weight: 400; }
+  .pbar { width: 130px; height: 8px; border-radius: 99px; background: var(--line-2); overflow: hidden; display: inline-block; vertical-align: middle; }
+  .pbar i { display: block; height: 100%; border-radius: 99px; }
+  .pnum { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); margin-left: 8px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 99px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+  .chip.idle { background: var(--line-2); color: var(--muted); }
+  .chip.run { background: var(--info-soft); color: var(--navy); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.err { background: var(--err-soft); color: var(--err); }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); }
+  .chip.fin { background: var(--navy); color: #fff; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  .flag { font-size: 12px; color: var(--warn); font-weight: 700; }
+  /* matriz */
+  .matrix { overflow-x: auto; }
+  .matrix table td, .matrix table th { padding: 3px; border: none; text-align: center; }
+  .matrix th.v { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 11px; text-transform: none; letter-spacing: 0; font-weight: 600; height: 200px; white-space: nowrap; vertical-align: bottom; background: none; }
+  .matrix th.v.p { color: var(--navy); }
+  .cell { width: 22px; height: 22px; border-radius: 5px; background: var(--line-2); display: inline-block; position: relative; }
+  .cell.on { opacity: .95; }
+  .cell.next { box-shadow: inset 0 0 0 2px var(--navy); background: #fff; }
+  .cell.out::after { content: '!'; position: absolute; inset: 0; color: #fff; font-weight: 800; font-size: 12px; display: grid; place-items: center; }
+  .cell.man::after { content: 'M'; position: absolute; inset: 0; color: #fff; font-weight: 800; font-size: 11px; display: grid; place-items: center; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .legend span { display: inline-flex; gap: 6px; align-items: center; }
+  /* chat */
+  .chat { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 150px); min-height: 460px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .convs { border-right: 1px solid var(--line); overflow-y: auto; }
+  .conv { display: flex; gap: 10px; align-items: center; padding: 11px 14px; border-bottom: 1px solid var(--line-2); cursor: pointer; }
+  .conv:hover { background: #FBF9F4; } .conv.on { background: var(--gold-soft); }
+  .conv .meta { flex: 1; min-width: 0; }
+  .conv .meta b { display: block; }
+  .conv .meta span { display: block; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv .n { background: var(--err); color: #fff; border-radius: 10px; min-width: 20px; height: 20px; font-size: 12px; display: grid; place-items: center; padding: 0 6px; font-weight: 700; }
+  .thread { display: flex; flex-direction: column; min-width: 0; }
+  .thread-h { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+  .thread-h b { font-family: 'Poppins', sans-serif; font-size: 18px; }
+  .msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; background: #FBF9F4; }
+  .msg { max-width: 70%; padding: 8px 12px; border-radius: 12px; white-space: pre-wrap; word-wrap: break-word; }
+  .msg.team { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 3px; }
+  .msg.admin { align-self: flex-end; background: var(--navy); color: #fff; border-bottom-right-radius: 3px; }
+  .msg.all { align-self: flex-end; background: var(--gold-soft); border: 1px solid #E7D28A; }
+  .msg time { display: block; font-size: 11.5px; opacity: .65; margin-top: 2px; }
+  .quick { display: flex; gap: 6px; flex-wrap: wrap; padding: 8px 16px 0; }
+  .quick button { border: 1px solid var(--line); background: #fff; border-radius: 99px; padding: 4px 10px; font-size: 13px; color: var(--navy); font-weight: 600; }
+  .composer { display: flex; gap: 8px; padding: 10px 16px 14px; }
+  .composer textarea { flex: 1; resize: none; height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+  .empty { margin: auto; color: var(--muted); text-align: center; padding: 30px; }
+  /* puntos */
+  .plist .pt { display: grid; grid-template-columns: 46px 1.3fr 120px 64px 76px 2.6fr 1.4fr 92px; gap: 8px; align-items: start; padding: 10px 0; border-bottom: 1px solid var(--line-2); }
+  .plist .pt.head { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; padding-top: 0; }
+  .num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--line-2); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .num.prueba { background: var(--gold); } .num.inicio { background: var(--navy); color: #fff; }
+  .acts { display: flex; gap: 4px; flex-wrap: wrap; }
+  .acts button { border: 1px solid var(--line); background: #fff; border-radius: 7px; width: 28px; height: 28px; padding: 0; }
+  /* QR */
+  .qrgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .qrc { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px; text-align: center; }
+  .qrc canvas { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line-2); }
+  .qrc b { display: block; font-size: 13.5px; margin: 6px 0 6px; line-height: 1.2; min-height: 32px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .note { background: var(--info-soft); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; color: var(--navy); }
+  /* modal */
+  .modal { position: fixed; inset: 0; background: rgba(15,22,38,.45); display: grid; place-items: center; z-index: 20; padding: 20px; }
+  .modal .box { background: var(--paper); border-radius: 14px; padding: 20px; width: 100%; max-width: 440px; }
+  .modal h3 { font-family: 'Poppins', sans-serif; margin: 0 0 8px; font-size: 20px; }
+  .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 10px; z-index: 30; display: none; }
+  .toast.on { display: block; }
+  .progress-txt { font-size: 13.5px; color: var(--muted); }
+  .on-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #C9C2B0; margin-left: 6px; vertical-align: middle; }
+  .on-dot.live { background: #2EAD5B; box-shadow: 0 0 0 3px rgba(46,173,91,.2); }
+  .waitbar { display: flex; align-items: center; gap: 16px; background: var(--grad); color: #fff; border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; }
+  .waitbar b { font-family: 'Poppins', sans-serif; font-size: 22px; display: block; }
+  .waitbar .grow small { opacity: .8; }
+  .waitbar .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .waitbar .chips span { font-size: 12.5px; padding: 2px 8px; border-radius: 99px; background: rgba(255,255,255,.12); }
+  .waitbar .chips span.live { background: #2EAD5B; }
+  .waitbar .btn { font-size: 16px; padding: 12px 20px; }
+  .btn.alert { background: #C62828; color: #fff; border-color: #C62828; }
+  @media (max-width: 900px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .chat { grid-template-columns: 1fr; height: auto; }
+    .convs { max-height: 240px; border-right: none; border-bottom: 1px solid var(--line); }
+    .grid2 { grid-template-columns: 1fr; }
+    .plist .pt { grid-template-columns: 40px 1fr; }
+    .plist .pt.head { display: none; }
+    .plist .pt > *:nth-child(n+3) { grid-column: 2; }
+    .hide-m { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="login">
+  <div class="box">
+    <div class="logo"></div>
+    <div class="eyebrow">Piezas de una vocación</div>
+    <h1>Panel de coordinación</h1>
+    <p>Introduce el PIN de administración.</p>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off">
+    <button class="btn primary" id="loginBtn" style="width:100%;margin-top:12px;padding:11px">Entrar</button>
+    <div id="loginErr" style="color:var(--err);margin-top:10px;font-weight:600"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <div class="top">
+    <div class="logo"></div>
+    <div class="brand">PIEZAS DE UNA VOCACIÓN<small>Gymkana de orientación · Panel de coordinación</small></div>
+    <span class="live" id="live"><i></i><span id="liveTxt">En directo</span></span>
+    <div class="clock"><b id="clock">--:--</b><small id="clockLbl">Sin iniciar</small></div>
+    <button class="btn alert" id="bcTop">📣 Aviso a todos</button>
+    <button class="btn gold" id="startBtn">▶ Iniciar actividad</button>
+    <button class="btn end hidden" id="endBtn">⏹ Terminar actividad</button>
+    <span class="endchip hidden" id="endChip">🏁 Terminada</span>
+  </div>
+  <nav id="nav">
+    <button data-tab="seg" class="on">Seguimiento</button>
+    <button data-tab="chat">Chat<span class="count hidden" id="navUnread">0</span></button>
+    <button data-tab="equipos">Equipos</button>
+    <button data-tab="puntos">Puntos y pistas</button>
+    <button data-tab="qr">QR y tarjetas</button>
+    <button data-tab="ajustes">Ajustes</button>
+  </nav>
+
+  <!-- SEGUIMIENTO -->
+  <section class="wrap tab" id="tab-seg">
+    <div class="waitbar hidden" id="waitbar">
+      <div style="font-size:34px">⏳</div>
+      <div class="grow"><b id="waitTitle">Sala de espera</b><small>Los equipos ven la sala de espera. Al pulsar «Iniciar», todos reciben su primera pista a la vez.</small><div class="chips" id="waitChips"></div></div>
+      <button class="btn gold" id="startBtn2">▶ Iniciar actividad</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span class="eyebrow">En marcha</span><b id="kRun">0</b></div>
+      <div class="kpi"><span class="eyebrow">Sin empezar</span><b id="kIdle">0</b></div>
+      <div class="kpi alert"><span class="eyebrow">Necesitan atención</span><b id="kAlert">0</b></div>
+      <div class="kpi done"><span class="eyebrow">Finalizados</span><b id="kDone">0</b></div>
+      <div class="kpi msg"><span class="eyebrow">Mensajes sin leer</span><b id="kMsg">0</b></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Equipo</th><th>Progreso</th><th>Último punto</th><th class="hide-m">Siguiente esperado</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="teamRows"></tbody>
+        </table>
+      </div>
+      <div class="empty hidden" id="noTeams">Todavía no hay equipos. Créalos en la pestaña <b>Equipos</b>.</div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Mapa del recorrido</h2>
+      <p class="sub">Cada fila es un equipo y cada columna un punto, en el orden del recorrido.</p>
+      <div class="matrix" id="matrix"></div>
+      <div class="legend">
+        <span><i class="cell" style="background:#2E86C1"></i> Escaneado</span>
+        <span><i class="cell next"></i> Siguiente esperado</span>
+        <span><i class="cell out" style="background:#B26A00"></i> Fuera de orden</span>
+        <span><i class="cell man" style="background:#667085"></i> Validado manualmente</span>
+        <span>Columnas en <b style="color:var(--navy)">azul</b>: pruebas</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAT -->
+  <section class="wrap tab hidden" id="tab-chat">
+    <div class="chat">
+      <div class="convs" id="convs"></div>
+      <div class="thread">
+        <div class="thread-h"><span class="dot" id="thDot"></span><b id="thName">Selecciona una conversación</b><span class="grow"></span><span class="muted small" id="thInfo"></span><button class="btn sm hidden" id="thValidate">Validar punto</button></div>
+        <div class="msgs" id="thMsgs"><div class="empty">Elige un equipo de la lista para ver sus mensajes.</div></div>
+        <div class="quick" id="thQuick">
+          <button>Vamos para allá, esperad un momento.</button>
+          <button>Os validamos el punto: tenéis la siguiente pista en pantalla.</button>
+          <button>Releed la pista con calma: el lugar está muy cerca.</button>
+          <button>Seguid las flechas del recorrido.</button>
+          <button>¡Ánimo, lo estáis haciendo genial!</button>
+        </div>
+        <div class="composer"><textarea id="thTxt" placeholder="Escribe una respuesta…" maxlength="500"></textarea><button class="btn primary" id="thSend">Enviar</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EQUIPOS -->
+  <section class="wrap tab hidden" id="tab-equipos">
+    <div class="grid2">
+      <div class="card">
+        <h2>Crear equipos</h2>
+        <p class="sub">Genera los equipos con un código de 4 caracteres y un punto de salida repartido de forma equilibrada por el recorrido.</p>
+        <div class="row"><input class="f" id="nTeams" type="number" min="1" max="60" value="15" style="width:110px"><button class="btn primary" id="createTeams">Generar equipos</button></div>
+        <p class="small muted" style="margin-bottom:0">Atención: sustituye los equipos actuales.</p>
+      </div>
+      <div class="card">
+        <h2>Tarjetas de equipo</h2>
+        <p class="sub">Una tarjeta por equipo con su código, un QR para entrar en la app y la primera pista. Dos tarjetas por hoja A4.</p>
+        <div class="row"><button class="btn gold" id="cardsPdf">⬇ Descargar tarjetas (PDF)</button><button class="btn" id="cardsDrive">Guardar en Drive</button></div>
+        <div class="progress-txt" id="cardsMsg"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="row" style="margin-bottom:8px"><h2 class="grow">Equipos</h2><button class="btn danger" id="delAllTeams">Borrar todos los equipos</button><button class="btn primary" id="saveTeams">Guardar cambios</button></div>
+      <table><thead><tr><th style="width:60px">Color</th><th>Nombre</th><th style="width:130px">Código</th><th>Punto de salida</th><th style="width:60px"></th></tr></thead><tbody id="teamEdit"></tbody></table>
+    </div>
+  </section>
+
+  <!-- PUNTOS -->
+  <section class="wrap tab hidden" id="tab-puntos">
+    <div class="card">
+      <div class="row" style="margin-bottom:6px"><div class="grow"><h2>Puntos y pistas</h2><p class="sub" style="margin:0">La pista de cada punto es la que aparece al escanear su QR y lleva al <b>siguiente</b> punto. Reordenar o editar no cambia los QR ya impresos.</p></div>
+        <button class="btn" id="addPoint">+ Añadir punto</button><button class="btn primary" id="savePoints">Guardar cambios</button></div>
+      <div class="plist" id="plist"></div>
+    </div>
+  </section>
+
+  <!-- QR -->
+  <section class="wrap tab hidden" id="tab-qr">
+    <div class="card" style="margin-bottom:16px">
+      <h2>Códigos QR de los puntos</h2>
+      <p class="sub">Cada QR abre la app y registra que el equipo ha llegado a ese punto. Se imprimen en A4 horizontal, uno por hoja, sobre la plantilla que subas.</p>
+      <div class="row">
+        <label class="small muted" style="min-width:120px">Página de los equipos</label>
+        <input class="f grow" id="baseUrl" placeholder="https://tu-usuario.github.io/gymkana/">
+        <button class="btn" id="saveUrl">Guardar dirección</button>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn gold" id="qrPdf">⬇ Todos en PDF</button>
+        <button class="btn" id="qrZip">⬇ Todos en PNG (ZIP)</button>
+        <button class="btn" id="qrPdfDrive">PDF en Drive</button>
+        <button class="btn" id="qrZipDrive">ZIP en Drive</button>
+        <span class="progress-txt" id="qrMsg"></span>
+      </div>
+      <p class="note" style="margin-top:12px">La <b>página de los equipos</b> es la dirección de GitHub Pages donde está publicada la app de los móviles (por ejemplo <i>https://tu-usuario.github.io/gymkana/</i>). Los QR y las tarjetas se generan con esa dirección. Guárdala antes de imprimir.</p>
+      <p class="note" style="margin-bottom:0;margin-top:8px">Si el navegador no inicia la descarga, usa <b>Guardar en Drive</b>: el archivo se crea en tu Drive y se abre en una pestaña nueva.</p>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <h2>Diseño del cartel</h2>
+      <p class="sub">Sube una imagen PNG o JPG apaisada (A4 horizontal) con el diseño. El QR se coloca cuadrado y centrado; ajusta su tamaño y altura para que caiga dentro del recuadro de la plantilla.</p>
+      <div class="design">
+        <canvas id="designPrev" width="1170" height="827"></canvas>
+        <div>
+          <div class="row"><button class="btn primary" id="tplBtn">⬆ Subir plantilla</button><button class="btn danger" id="tplDel">Quitar plantilla</button></div>
+          <input type="file" id="tplInput" accept="image/png,image/jpeg" style="display:none">
+          <div class="progress-txt" id="tplMsg" style="margin-top:6px"></div>
+          <label class="r">Tamaño del QR <span class="muted small" id="tamVal"></span></label>
+          <input type="range" id="qrTam" min="0.2" max="0.7" step="0.01">
+          <label class="r">Altura del QR <span class="muted small" id="yVal"></span></label>
+          <input type="range" id="qrY" min="0.3" max="0.7" step="0.005">
+          <label class="r"><input type="checkbox" id="qrEtq"> Mostrar número y nombre del lugar bajo el QR</label>
+          <div class="row" style="margin-top:12px"><button class="btn gold" id="saveDesign">Guardar diseño</button><select class="f" id="prevPoint" style="width:auto;flex:1"></select></div>
+        </div>
+      </div>
+    </div>
+    <div class="qrgrid" id="qrgrid"></div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section class="wrap tab hidden" id="tab-ajustes">
+    <div class="grid2">
+      <div class="card">
+        <h2>Avisos y mensajes</h2>
+        <label class="small muted">Minutos sin escanear para marcar a un equipo en alerta</label>
+        <input class="f" id="cfgAlerta" type="number" min="3" max="60" style="width:110px;margin-bottom:12px">
+        <label class="small muted">Mensaje al pasar por el Patio sin haber terminado</label>
+        <textarea class="f" id="cfgPatio" style="margin-bottom:12px"></textarea>
+        <label class="small muted">Mensaje al completar todos los puntos</label>
+        <textarea class="f" id="cfgVuelta" style="margin-bottom:12px"></textarea>
+        <label class="small muted">Mensaje del reto final (al volver al Patio)</label>
+        <textarea class="f" id="cfgFinal" style="margin-bottom:12px"></textarea>
+        <button class="btn primary" id="saveCfg">Guardar ajustes</button>
+      </div>
+      <div>
+        <div class="card">
+          <h2>Aviso a todos los equipos</h2>
+          <p class="sub">Aparece <b style="color:#C62828">en rojo y a pantalla completa</b> en el móvil de todos los equipos, y queda guardado en su chat.</p>
+          <textarea class="f" id="bcTxt" placeholder="Ej.: Quedan 15 minutos. Id terminando y volved al Patio de columnas."></textarea>
+          <button class="btn gold" id="bcSend" style="margin-top:10px">📣 Enviar a todos</button>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h2>Reiniciar la actividad</h2>
+          <p class="sub">Borra todos los escaneos y mensajes, pone el reloj a cero y devuelve a los equipos a la sala de espera. Los equipos y los puntos se mantienen. Úsalo después de las pruebas y antes de empezar de verdad.</p>
+          <button class="btn danger" id="resetBtn">Reiniciar escaneos y chat</button>
+        </div>
+        <div class="card hidden" id="reopenBox" style="margin-top:16px">
+          <h2>Reabrir la actividad</h2>
+          <p class="sub">Si la terminaste por error, los equipos vuelven a su última pista y el reloj sigue desde la hora de inicio.</p>
+          <button class="btn" id="reopenBtn">↺ Reabrir actividad</button>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h2>PIN de administración</h2>
+          <p class="sub" style="margin:0">Para cambiarlo, abre el editor de Apps Script, escribe el nuevo PIN en <code>NUEVO_PIN</code> y ejecuta la función <code>cambiarPin</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal hidden" id="modal"><div class="box" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var A = { pin: null, url: '', ver: 0, data: null, puntos: null, teams: null, sel: null, skew: 0, tab: 'seg' };
+function $(id) { return document.getElementById(id); }
+function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+function api(fn) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  var url = window.GYMKANA_API || '';
+  if (!url || /PEGA_AQUI/.test(url)) return Promise.reject(new Error('Falta configurar la dirección de Apps Script en config.js.'));
+  var ctrl = window.AbortController ? new AbortController() : null, tm = ctrl && setTimeout(function () { ctrl.abort(); }, 60000);
+  // text/plain evita la petición previa de CORS; Apps Script la acepta igual
+  return fetch(url, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ fn: fn, args: args }), signal: ctrl ? ctrl.signal : undefined })
+    .then(function (r) { if (!r.ok) throw new Error('Sin conexión con el servidor (' + r.status + ')'); return r.json(); })
+    .then(function (j) { clearTimeout(tm); if (!j.ok) throw new Error(j.error); return j.result; })
+    .catch(function (e) { clearTimeout(tm); if (e && e.name === 'AbortError') throw new Error('El servidor tarda en responder. Inténtalo de nuevo.'); if (e instanceof SyntaxError) throw new Error('No se puede leer la respuesta del servidor. Revisa que la aplicación web esté publicada para «Cualquier usuario».'); if (e instanceof TypeError) throw new Error('No hay conexión con el servidor. Comprueba la conexión a internet.'); throw e; });
+}
+function adm(fn) { var a = Array.prototype.slice.call(arguments, 1); return api.apply(null, [fn, A.pin].concat(a)); }
+function toast(t) { var x = $('toast'); x.textContent = t; x.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function () { x.classList.remove('on'); }, 3000); }
+function clean(e) { return String(e && e.message || e).replace(/^(Exception|Error):\s*/, ''); }
+function now() { return Date.now() + A.skew; }
+function hora(ts) { var d = new Date(ts); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+function hace(ts) { var m = Math.floor((now() - ts) / 60000); return m < 1 ? 'ahora mismo' : 'hace ' + m + ' min'; }
+function sstore(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
+
+// ───── Login ─────
+function login(pin) {
+  $('loginBtn').disabled = true;
+  api('adminLogin', pin).then(function (r) {
+    A.pin = pin; sstore('pdv_pin', pin);
+    // En GitHub, la página de los equipos está en la misma carpeta que este panel
+    A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
+    $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+    $('baseUrl').value = localStorageGet('pdv_url') || A.url;
+    refresh(true).then(function () { var u = A.data && A.data.config && A.data.config.urlEquipos; if (u) $('baseUrl').value = u; }); setInterval(refresh, 4000); setInterval(tick, 1000);
+  }).catch(function (e) { $('loginBtn').disabled = false; $('loginErr').textContent = clean(e); sstore('pdv_pin', ''); });
+}
+function localStorageGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+$('loginBtn').onclick = function () { login($('pin').value.trim()); };
+$('pin').onkeydown = function (e) { if (e.key === 'Enter') $('loginBtn').onclick(); };
+if (sstore('pdv_pin')) login(sstore('pdv_pin'));
+
+// ───── Pestañas ─────
+Array.prototype.forEach.call(document.querySelectorAll('#nav button'), function (b) {
+  b.onclick = function () {
+    A.tab = b.getAttribute('data-tab');
+    Array.prototype.forEach.call(document.querySelectorAll('#nav button'), function (x) { x.classList.toggle('on', x === b); });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (s) { s.classList.toggle('hidden', s.id !== 'tab-' + A.tab); });
+    if (A.tab === 'equipos') cargarEquipos();
+    if (A.tab === 'puntos') cargarPuntos();
+    if (A.tab === 'qr') cargarQR();
+    if (A.tab === 'ajustes') pintarAjustes();
+    if (A.tab === 'chat') pintarChat();
+  };
+});
+
+// ───── Datos en directo ─────
+function refresh(force) {
+  if (A.busy && !force) return Promise.resolve();
+  A.busy = true;
+  return adm('adminDashboard', force ? 0 : A.ver).then(function (d) {
+    A.busy = false;
+    $('live').classList.remove('off'); $('liveTxt').textContent = 'En directo';
+    A.skew = d.ahora - Date.now();
+    if (d.same) { if (d.vistos && A.data) A.data.equipos.forEach(function (t) { t.visto = d.vistos[t.codigo] || t.visto; }); pintarSeguimiento(); return; }
+    A.ver = d.ver; A.data = d;
+    pintarSeguimiento(); pintarChat(true); tick();
+  }).catch(function (e) {
+    A.busy = false;
+    $('live').classList.add('off'); $('liveTxt').textContent = 'Sin conexión';
+    if (/PIN/.test(clean(e))) { sstore('pdv_pin', ''); location.reload(); }
+  });
+}
+
+function tick() {
+  var d = A.data; if (!d) return;
+  var ini = Number(d.config.inicio || 0), fin = Number(d.config.fin || 0);
+  if (ini) {
+    var s = Math.max(0, Math.floor(((fin || now()) - ini) / 1000));
+    var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+    $('clock').textContent = (h ? h + ':' : '') + ('0' + m).slice(-2) + ':' + ('0' + ss).slice(-2);
+    $('clockLbl').textContent = fin ? 'Terminada a las ' + hora(fin) : 'Iniciada a las ' + hora(ini);
+    $('startBtn').classList.add('hidden');
+  } else {
+    $('clock').textContent = '--:--'; $('clockLbl').textContent = 'Sin iniciar'; $('startBtn').classList.remove('hidden');
+  }
+  $('endBtn').classList.toggle('hidden', !ini || !!fin);
+  $('endChip').classList.toggle('hidden', !fin);
+  $('reopenBox').classList.toggle('hidden', !fin);
+}
+$('endBtn').onclick = function () {
+  confirmar('Terminar la actividad', 'Todos los móviles mostrarán la pantalla de fin y ya no se registrarán más QR. El reloj se detiene. ¿Damos por terminada la gymkana?', 'Terminar', function () {
+    adm('adminEnd').then(function () { toast('Actividad terminada'); refresh(true); }).catch(function (e) { toast(clean(e)); });
+  }, true);
+};
+function conectado(t) { return t.visto && (now() - t.visto) < 30000; }
+function pintarEspera() {
+  var d = A.data, wb = $('waitbar');
+  var esperando = d && !Number(d.config.inicio || 0) && d.equipos.length;
+  wb.classList.toggle('hidden', !esperando);
+  if (!esperando) return;
+  var n = d.equipos.filter(conectado).length;
+  $('waitTitle').textContent = 'Sala de espera · ' + n + ' de ' + d.equipos.length + ' equipos conectados';
+  var ch = $('waitChips'); ch.innerHTML = '';
+  d.equipos.forEach(function (t) { ch.appendChild(el('span', conectado(t) ? 'live' : '', t.nombre)); });
+}
+$('startBtn2').onclick = function () { $('startBtn').onclick(); };
+$('bcTop').onclick = function () {
+  var box = $('modalBox'); box.innerHTML = '';
+  box.appendChild(el('h3', '', '📣 Aviso a todos los equipos'));
+  box.appendChild(el('p', 'muted small', 'Aparecerá en rojo y a pantalla completa en todos los móviles.'));
+  var ta = el('textarea', 'f'); ta.maxLength = 500; ta.placeholder = 'Ej.: Quedan 15 minutos. Id terminando y volved al Patio de columnas.'; box.appendChild(ta);
+  var r = el('div', 'row'); r.style.marginTop = '12px'; r.style.justifyContent = 'flex-end';
+  var c = el('button', 'btn', 'Cancelar'); c.onclick = cerrarModal;
+  var ok = el('button', 'btn alert', 'Enviar a todos'); ok.onclick = function () {
+    var t = ta.value.trim(); if (!t) return; ok.disabled = true;
+    adm('adminSend', '*', t).then(function () { cerrarModal(); toast('Aviso enviado a todos los equipos'); refresh(true); }).catch(function (e) { ok.disabled = false; toast(clean(e)); });
+  };
+  r.appendChild(c); r.appendChild(ok); box.appendChild(r); $('modal').classList.remove('hidden'); setTimeout(function () { ta.focus(); }, 50);
+};
+$('startBtn').onclick = function () {
+  confirmar('Iniciar la actividad', 'Todos los equipos de la sala de espera recibirán su primera pista a la vez y empezará a contar el reloj. ¿Damos la salida?', 'Iniciar', function () {
+    adm('adminStart').then(function () { toast('¡Actividad iniciada!'); refresh(true); });
+  });
+};
+
+function estadoEquipo(t, cfg) {
+  var alerta = Number(cfg.alertaMin || 10);
+  var ini = Number(cfg.inicio || 0);
+  if (t.finalizado) return { k: 'fin', txt: '🏆 Finalizado', rank: 5 };
+  if (Number(cfg.fin || 0)) return { k: 'idle', txt: '🏁 Actividad terminada', rank: 4 };
+  if (t.completo) return { k: 'ok', txt: '🏁 Volviendo al Patio', rank: 3 };
+  var ref = t.ultimo ? t.ultimo.ts : ini;
+  if (!t.ultimo && !ini) return { k: 'idle', txt: 'Sin empezar', rank: 4 };
+  var min = ref ? (now() - ref) / 60000 : 0;
+  if (t.sinLeer) return { k: 'err', txt: '💬 Pide ayuda', rank: 0 };
+  if (min >= alerta * 1.5) return { k: 'err', txt: '⚠ ' + Math.floor(min) + ' min parado', rank: 0 };
+  if (min >= alerta) return { k: 'warn', txt: '⏱ ' + Math.floor(min) + ' min parado', rank: 1 };
+  if (!t.ultimo) return { k: 'idle', txt: 'Sin primer escaneo', rank: 2 };
+  return { k: 'run', txt: 'En marcha', rank: 2 };
+}
+function nombrePunto(o) { var p = A.data && A.data.puntos.filter(function (x) { return x.orden === o; })[0]; return p ? p.nombre : '—'; }
+
+function pintarSeguimiento() {
+  var d = A.data; if (!d) return;
+  var cfg = d.config, k = { run: 0, idle: 0, alert: 0, done: 0, msg: 0 };
+  var rows = $('teamRows'); rows.innerHTML = '';
+  $('noTeams').classList.toggle('hidden', d.equipos.length > 0);
+  var lista = d.equipos.map(function (t) { return { t: t, e: estadoEquipo(t, cfg) }; });
+  lista.sort(function (a, b) { return a.e.rank - b.e.rank || (b.t.hechos - a.t.hechos); });
+  lista.forEach(function (x) {
+    var t = x.t, e = x.e;
+    if (e.k === 'fin') k.done++; else if (e.k === 'err' || e.k === 'warn') k.alert++; else if (e.k === 'idle') k.idle++; else k.run++;
+    k.msg += t.sinLeer;
+    var tr = el('tr');
+    var c1 = el('td'); var n = el('div', 'tname'); var dt = el('span', 'dot'); dt.style.background = t.color; n.appendChild(dt); n.appendChild(el('span', '', t.nombre)); n.appendChild(el('span', 'code', t.codigo)); var od = el('span', 'on-dot' + (conectado(t) ? ' live' : '')); od.title = conectado(t) ? 'Conectado ahora' : 'Sin conexión reciente'; n.appendChild(od); c1.appendChild(n);
+    var c2 = el('td'); var pb = el('span', 'pbar'); var fill = el('i'); fill.style.width = Math.round(100 * t.hechos / t.total) + '%'; fill.style.background = t.color; pb.appendChild(fill); c2.appendChild(pb); c2.appendChild(el('span', 'pnum', t.hechos + '/' + t.total));
+    var c3 = el('td');
+    if (t.ultimo) { c3.appendChild(el('div', '', nombrePunto(t.ultimo.orden))); c3.appendChild(el('div', 'small muted', hace(t.ultimo.ts) + ' · ' + hora(t.ultimo.ts))); }
+    else c3.appendChild(el('span', 'muted', 'Sale hacia: ' + nombrePunto(t.salida)));
+    var fuera = t.escaneos.filter(function (s) { return s.fuera; }).length;
+    if (fuera) c3.appendChild(el('div', 'flag', fuera + ' fuera de orden'));
+    var c4 = el('td', 'hide-m', t.esperado === '' ? '—' : nombrePunto(t.esperado));
+    var c5 = el('td'); c5.appendChild(el('span', 'chip ' + e.k, e.txt));
+    var c6 = el('td'); c6.style.whiteSpace = 'nowrap';
+    var bc = el('button', 'btn sm', '💬' + (t.sinLeer ? ' ' + t.sinLeer : '')); bc.title = 'Abrir chat'; bc.onclick = function () { abrirChat(t.codigo); };
+    var bv = el('button', 'btn sm', 'Validar'); bv.title = 'Validar un punto manualmente'; bv.style.marginLeft = '6px'; bv.onclick = function () { validar(t); };
+    c6.appendChild(bc); c6.appendChild(bv);
+    [c1, c2, c3, c4, c5, c6].forEach(function (c) { tr.appendChild(c); });
+    rows.appendChild(tr);
+  });
+  $('kRun').textContent = k.run; $('kIdle').textContent = k.idle; $('kAlert').textContent = k.alert; $('kDone').textContent = k.done; $('kMsg').textContent = k.msg;
+  $('navUnread').textContent = k.msg; $('navUnread').classList.toggle('hidden', !k.msg);
+  pintarEspera();
+  pintarMatriz();
+}
+
+function pintarMatriz() {
+  var d = A.data, box = $('matrix'); box.innerHTML = '';
+  if (!d.equipos.length) return;
+  var tb = el('table'), hr = el('tr'); hr.appendChild(el('th', '', ''));
+  d.puntos.forEach(function (p) { var th = el('th', 'v' + (p.tipo === 'prueba' ? ' p' : ''), p.orden + '. ' + p.nombre); hr.appendChild(th); });
+  var th0 = el('thead'); th0.appendChild(hr); tb.appendChild(th0);
+  var body = el('tbody');
+  d.equipos.forEach(function (t) {
+    var tr = el('tr'), c = el('td'); c.style.textAlign = 'left'; c.style.whiteSpace = 'nowrap';
+    var n = el('span', 'tname small'); var dt = el('span', 'dot'); dt.style.background = t.color; n.appendChild(dt); n.appendChild(el('span', '', t.nombre)); c.appendChild(n); tr.appendChild(c);
+    var por = {}; t.escaneos.forEach(function (s) { if (!por[s.orden]) por[s.orden] = s; });
+    d.puntos.forEach(function (p) {
+      var td = el('td'), s = por[p.orden], cell = el('i', 'cell');
+      if (s) { cell.classList.add('on'); cell.style.background = s.manual ? '#667085' : (s.fuera ? '#B26A00' : t.color); if (s.manual) cell.classList.add('man'); else if (s.fuera) cell.classList.add('out'); cell.title = p.nombre + ' · ' + hora(s.ts) + (s.manual ? ' (manual)' : '') + (s.fuera ? ' (fuera de orden)' : ''); }
+      else if (t.esperado === p.orden) { cell.classList.add('next'); cell.title = 'Siguiente esperado: ' + p.nombre; }
+      td.appendChild(cell); tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+  tb.appendChild(body); box.appendChild(tb);
+}
+
+// ───── Validación manual ─────
+function validar(t) {
+  var d = A.data;
+  var box = $('modalBox'); box.innerHTML = '';
+  box.appendChild(el('h3', '', 'Validar punto · ' + t.nombre));
+  box.appendChild(el('p', 'muted small', 'Úsalo si un equipo no encuentra el QR o no puede escanearlo. Se registra el punto y el equipo recibe la siguiente pista en su móvil.'));
+  var sel = el('select', 'f');
+  d.puntos.forEach(function (p) {
+    var o = el('option', '', p.orden + '. ' + p.nombre + (t.escaneos.some(function (s) { return s.orden === p.orden; }) ? ' ✓' : ''));
+    o.value = p.orden; if (p.orden === t.esperado) o.selected = true; sel.appendChild(o);
+  });
+  box.appendChild(sel);
+  var r = el('div', 'row'); r.style.marginTop = '14px'; r.style.justifyContent = 'flex-end';
+  var del = el('button', 'btn danger', 'Borrar escaneo');
+  del.onclick = function () { adm('adminDeleteScan', t.codigo, Number(sel.value)).then(function () { cerrarModal(); toast('Escaneo borrado'); refresh(true); }).catch(function (e) { toast(clean(e)); }); };
+  var c = el('button', 'btn', 'Cancelar'); c.onclick = cerrarModal;
+  var ok = el('button', 'btn primary', 'Validar'); ok.onclick = function () { ok.disabled = true; adm('adminValidate', t.codigo, Number(sel.value)).then(function () { cerrarModal(); toast('Punto validado'); refresh(true); }).catch(function (e) { ok.disabled = false; toast(clean(e)); }); };
+  r.appendChild(del); r.appendChild(el('span', 'grow')); r.appendChild(c); r.appendChild(ok); box.appendChild(r);
+  $('modal').classList.remove('hidden');
+}
+function cerrarModal() { $('modal').classList.add('hidden'); }
+$('modal').onclick = function (e) { if (e.target === $('modal')) cerrarModal(); };
+function confirmar(titulo, texto, boton, fn, peligro) {
+  var box = $('modalBox'); box.innerHTML = '';
+  box.appendChild(el('h3', '', titulo)); box.appendChild(el('p', 'muted', texto));
+  var r = el('div', 'row'); r.style.justifyContent = 'flex-end';
+  var c = el('button', 'btn', 'Cancelar'); c.onclick = cerrarModal;
+  var ok = el('button', 'btn ' + (peligro ? 'danger' : 'primary'), boton); ok.onclick = function () { cerrarModal(); fn(); };
+  r.appendChild(c); r.appendChild(ok); box.appendChild(r); $('modal').classList.remove('hidden');
+}
+
+// ───── Chat ─────
+function abrirChat(codigo) { A.sel = codigo; document.querySelector('#nav button[data-tab=chat]').onclick(); }
+function pintarChat(soloDatos) {
+  var d = A.data; if (!d) return;
+  if (soloDatos && A.tab !== 'chat') return;
+  var convs = $('convs'); convs.innerHTML = '';
+  var todos = [{ codigo: '*', nombre: '📣 Todos los equipos', color: '#C9A227' }].concat(d.equipos);
+  var resumen = todos.map(function (t) {
+    var ms = d.mensajes.filter(function (m) { return m.equipo === t.codigo; });
+    var last = ms[ms.length - 1];
+    return { t: t, last: last, n: ms.filter(function (m) { return m.de === 'equipo' && !m.leido; }).length };
+  });
+  resumen.sort(function (a, b) { if (a.t.codigo === '*') return -1; if (b.t.codigo === '*') return 1; return (b.n - a.n) || ((b.last ? b.last.ts : 0) - (a.last ? a.last.ts : 0)); });
+  resumen.forEach(function (r) {
+    var c = el('div', 'conv' + (A.sel === r.t.codigo ? ' on' : ''));
+    var dt = el('span', 'dot'); dt.style.background = r.t.color; c.appendChild(dt);
+    var m = el('div', 'meta'); m.appendChild(el('b', '', r.t.nombre)); m.appendChild(el('span', '', r.last ? (r.last.de === 'admin' ? 'Tú: ' : '') + r.last.texto : 'Sin mensajes')); c.appendChild(m);
+    if (r.n) c.appendChild(el('span', 'n', r.n));
+    c.onclick = function () { A.sel = r.t.codigo; pintarChat(); };
+    convs.appendChild(c);
+  });
+  pintarHilo();
+}
+function pintarHilo() {
+  var d = A.data, box = $('thMsgs');
+  if (!A.sel) return;
+  var t = A.sel === '*' ? { codigo: '*', nombre: 'Todos los equipos', color: '#C9A227' } : d.equipos.filter(function (x) { return x.codigo === A.sel; })[0];
+  if (!t) return;
+  $('thDot').style.background = t.color; $('thName').textContent = t.nombre;
+  $('thInfo').textContent = t.codigo === '*' ? 'Mensaje de difusión' : (t.hechos + '/' + t.total + ' puntos · ' + (t.ultimo ? 'último: ' + nombrePunto(t.ultimo.orden) + ' (' + hace(t.ultimo.ts) + ')' : 'sin escaneos'));
+  $('thValidate').classList.toggle('hidden', t.codigo === '*');
+  $('thValidate').onclick = function () { validar(t); };
+  var ms = d.mensajes.filter(function (m) { return m.equipo === t.codigo; });
+  var pegado = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  box.innerHTML = '';
+  if (!ms.length) box.appendChild(el('div', 'empty', t.codigo === '*' ? 'Los avisos que envíes aquí llegan a todos los equipos.' : 'Este equipo todavía no ha escrito.'));
+  ms.forEach(function (m) {
+    var b = el('div', 'msg ' + (m.de === 'equipo' ? 'team' : (m.equipo === '*' ? 'all' : 'admin')));
+    b.appendChild(document.createTextNode(m.texto)); b.appendChild(el('time', '', (m.de === 'equipo' ? t.nombre : 'Coordinación') + ' · ' + hora(m.ts)));
+    box.appendChild(b);
+  });
+  if (pegado || !pintarHilo._last || pintarHilo._last !== A.sel) box.scrollTop = box.scrollHeight;
+  pintarHilo._last = A.sel;
+  if (t.codigo !== '*' && ms.some(function (m) { return m.de === 'equipo' && !m.leido; })) {
+    ms.forEach(function (m) { m.leido = true; });
+    adm('adminMarkRead', t.codigo).then(function () { refresh(true); });
+  }
+}
+function enviarAdmin(texto) {
+  texto = String(texto || '').trim(); if (!texto || !A.sel) return;
+  A.data.mensajes.push({ id: 'tmp', ts: now(), equipo: A.sel, de: 'admin', texto: texto, leido: true }); pintarHilo();
+  adm('adminSend', A.sel, texto).then(function () { refresh(true); }).catch(function (e) { toast(clean(e)); });
+}
+$('thSend').onclick = function () { enviarAdmin($('thTxt').value); $('thTxt').value = ''; };
+$('thTxt').onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('thSend').onclick(); } };
+Array.prototype.forEach.call(document.querySelectorAll('#thQuick button'), function (b) { b.onclick = function () { enviarAdmin(b.textContent); }; });
+
+// ───── Equipos ─────
+function cargarEquipos() {
+  return adm('adminGetTeams').then(function (ts) { A.teams = ts; pintarEquipos(); return ts; });
+}
+function puntosLista() { return A.puntos ? Promise.resolve(A.puntos) : adm('adminGetPoints').then(function (p) { A.puntos = p; return p; }); }
+function pintarEquipos() {
+  puntosLista().then(function (ps) {
+    var tb = $('teamEdit'); tb.innerHTML = '';
+    if (!A.teams.length) { var tr0 = el('tr'); var td0 = el('td', 'muted', 'No hay equipos todavía.'); td0.colSpan = 5; tr0.appendChild(td0); tb.appendChild(tr0); }
+    A.teams.forEach(function (t) {
+      var tr = el('tr');
+      var c = el('input'); c.type = 'color'; c.value = t.color; c.style.width = '40px'; c.style.height = '30px'; c.style.border = 'none'; c.style.background = 'none'; c.oninput = function () { t.color = c.value; };
+      var n = el('input', 'f'); n.value = t.nombre; n.oninput = function () { t.nombre = n.value; };
+      var s = el('select', 'f'); ps.forEach(function (p) { if (p.orden === 0) return; var o = el('option', '', p.orden + '. ' + p.nombre + (p.tipo === 'prueba' ? ' 🎯' : '')); o.value = p.orden; if (p.orden === t.salida) o.selected = true; s.appendChild(o); });
+      s.onchange = function () { t.salida = Number(s.value); };
+      var del = el('button', 'btn sm danger', '🗑'); del.title = 'Borrar equipo';
+      del.onclick = function () { confirmar('Borrar «' + t.nombre + '»', 'Se borrará el equipo junto con sus escaneos y mensajes. Su tarjeta dejará de funcionar.', 'Borrar', function () {
+        adm('adminDeleteTeam', t.codigo).then(function () { toast('Equipo borrado'); cargarEquipos(); refresh(true); }).catch(function (e) { toast(clean(e)); }); }, true); };
+      var cod = el('span', 'code', t.codigo);
+      [c, n, cod, s, del].forEach(function (x) { var td = el('td'); td.appendChild(x); tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+  });
+}
+$('createTeams').onclick = function () {
+  var n = Number($('nTeams').value);
+  confirmar('Generar ' + n + ' equipos', 'Se sustituirán los equipos actuales y sus códigos. ¿Continuar?', 'Generar', function () {
+    adm('adminCreateTeams', n).then(function () { toast(n + ' equipos creados'); cargarEquipos(); refresh(true); }).catch(function (e) { toast(clean(e)); });
+  });
+};
+$('delAllTeams').onclick = function () {
+  confirmar('Borrar todos los equipos', 'Se borrarán TODOS los equipos, sus escaneos y mensajes, y la actividad volverá a la sala de espera. Las tarjetas impresas dejarán de funcionar.', 'Sí, borrar todo', function () {
+    adm('adminDeleteAllTeams').then(function () { toast('Equipos borrados'); cargarEquipos(); refresh(true); }).catch(function (e) { toast(clean(e)); });
+  }, true);
+};
+$('saveTeams').onclick = function () { adm('adminSaveTeams', A.teams).then(function () { toast('Equipos guardados'); cargarEquipos(); refresh(true); }).catch(function (e) { toast(clean(e)); }); };
+
+// ───── Puntos ─────
+function cargarPuntos() { return adm('adminGetPoints').then(function (p) { A.puntos = p; pintarPuntos(); }); }
+function pintarPuntos() {
+  var box = $('plist'); box.innerHTML = '';
+  var h = el('div', 'pt head'); ['#', 'Lugar', 'Tipo', 'Letra', 'Año', 'Pista (lleva al siguiente punto)', 'Dirección 🧭', ''].forEach(function (x) { h.appendChild(el('div', '', x)); }); box.appendChild(h);
+  A.puntos.forEach(function (p, i) {
+    var r = el('div', 'pt');
+    r.appendChild(el('div', 'num ' + (i === 0 ? 'inicio' : p.tipo), i));
+    var nm = el('input', 'f'); nm.value = p.nombre; nm.oninput = function () { p.nombre = nm.value; };
+    var tp = el('select', 'f'); (i === 0 ? [['inicio', 'Inicio / final']] : [['qr', 'QR de paso'], ['prueba', 'Prueba 🎯']]).forEach(function (o) { var op = el('option', '', o[1]); op.value = o[0]; if (p.tipo === o[0]) op.selected = true; tp.appendChild(op); });
+    tp.onchange = function () { p.tipo = tp.value; pintarPuntos(); };
+    var lt = el('input', 'f'); lt.value = p.letra; lt.maxLength = 2; lt.oninput = function () { p.letra = lt.value; };
+    var an = el('input', 'f'); an.value = p.anio; an.oninput = function () { p.anio = an.value; };
+    var ps = el('textarea', 'f'); ps.value = p.pista; ps.oninput = function () { p.pista = ps.value; };
+    var dr = el('textarea', 'f'); dr.value = p.direccion; dr.placeholder = 'Ej.: Sube la escalera de la izquierda'; dr.oninput = function () { p.direccion = dr.value; };
+    var acts = el('div', 'acts');
+    var up = el('button', '', '↑'); up.title = 'Subir'; up.disabled = i <= 1; up.onclick = function () { mover(i, -1); };
+    var dn = el('button', '', '↓'); dn.title = 'Bajar'; dn.disabled = i === 0 || i === A.puntos.length - 1; dn.onclick = function () { mover(i, 1); };
+    var rm = el('button', '', '✕'); rm.title = 'Eliminar'; rm.disabled = i === 0; rm.onclick = function () { confirmar('Eliminar punto', '¿Eliminar «' + p.nombre + '»? Su QR dejará de funcionar.', 'Eliminar', function () { A.puntos.splice(i, 1); pintarPuntos(); }, true); };
+    acts.appendChild(up); acts.appendChild(dn); acts.appendChild(rm);
+    if (p.tipo !== 'prueba') { lt.disabled = true; an.disabled = true; }
+    [nm, tp, lt, an, ps, dr, acts].forEach(function (x) { r.appendChild(x); });
+    box.appendChild(r);
+  });
+}
+function mover(i, d) { var j = i + d; if (j < 1 || j >= A.puntos.length) return; var x = A.puntos[i]; A.puntos[i] = A.puntos[j]; A.puntos[j] = x; pintarPuntos(); }
+$('addPoint').onclick = function () { A.puntos.push({ nombre: 'Nuevo punto', tipo: 'qr', letra: '', anio: '', pista: '', direccion: '', token: '' }); pintarPuntos(); window.scrollTo(0, document.body.scrollHeight); };
+$('savePoints').onclick = function () { adm('adminSavePoints', A.puntos).then(function (p) { A.puntos = p; pintarPuntos(); toast('Puntos guardados'); refresh(true); }).catch(function (e) { toast(clean(e)); }); };
+
+// ───── QR: dibujo ─────
+var NAVY = '#0B2E6B', BLUE = '#0B4FA8', BRIGHT = '#1E88E5', PALE = '#EAF4FE', SKY = '#CFE6FB';
+var PW = 2339, PH = 1654; // cartel A4 horizontal a 200 ppp
+function qrMatrix(texto) { var q = qrcode(0, 'M'); q.addData(texto); q.make(); return q; }
+function dibujarQR(ctx, texto, x, y, size) {
+  var q = qrMatrix(texto), n = q.getModuleCount(), quiet = 2, cell = size / (n + quiet * 2);
+  ctx.fillStyle = '#fff'; ctx.fillRect(x, y, size, size);
+  ctx.fillStyle = '#0B1A33';
+  for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) ctx.fillRect(Math.floor(x + (c + quiet) * cell), Math.floor(y + (r + quiet) * cell), Math.ceil(cell), Math.ceil(cell));
+}
+function wrap(ctx, texto, x, y, maxW, lh, maxLines) {
+  var words = String(texto).split(/\s+/), line = '', lines = [];
+  words.forEach(function (w) { var t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; });
+  if (line) lines.push(line);
+  if (maxLines && lines.length > maxLines) { lines = lines.slice(0, maxLines); lines[maxLines - 1] += '…'; }
+  lines.forEach(function (l, i) { ctx.fillText(l, x, y + i * lh); });
+  return lines.length * lh;
+}
+function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function urlPunto(p) { var b = $('baseUrl').value.trim(); return b + (b.indexOf('?') >= 0 ? '&' : '?') + 'q=' + p.token; }
+function urlEquipo(t) { var b = $('baseUrl').value.trim(); return b + (b.indexOf('?') >= 0 ? '&' : '?') + 't=' + t.codigo; }
+function fuentes() {
+  if (!document.fonts || !document.fonts.load) return Promise.resolve();
+  return Promise.all([document.fonts.load('800 40px Poppins'), document.fonts.load('700 40px Poppins'), document.fonts.load('700 30px "Nunito Sans"'), document.fonts.load('400 30px "Nunito Sans"'), logoImg()]).catch(function () {});
+}
+// Logo: se toma de la variable CSS --logo (máscara) y se tiñe del color pedido
+var LOGO = null;
+function logoImg() {
+  if (LOGO) return Promise.resolve(LOGO);
+  return new Promise(function (res) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--logo'), m = v.match(/url\(["']?(data:[^"')]+)["']?\)/);
+    if (!m) return res(null);
+    var im = new Image(); im.onload = function () { LOGO = im; res(im); }; im.onerror = function () { res(null); }; im.src = m[1];
+  });
+}
+function dibujarLogo(c, x, y, w, color) {
+  if (!LOGO) return;
+  var h = w * LOGO.height / LOGO.width, o = document.createElement('canvas'); o.width = Math.ceil(w); o.height = Math.ceil(h);
+  var oc = o.getContext('2d'); oc.drawImage(LOGO, 0, 0, w, h); oc.globalCompositeOperation = 'source-in'; oc.fillStyle = color; oc.fillRect(0, 0, w, h);
+  c.drawImage(o, x, y);
+}
+function gradiente(c, x0, y0, x1, y1) { var g = c.createLinearGradient(x0, y0, x1, y1); g.addColorStop(0, NAVY); g.addColorStop(.55, BLUE); g.addColorStop(1, BRIGHT); return g; }
+
+// Ajustes del cartel (se guardan en Config)
+function diseno() {
+  var c = (A.data && A.data.config) || {};
+  if (!A.dis) A.dis = { tam: Number(c.qrTam) || 0.4, y: Number(c.qrY) || 0.47, etq: String(c.qrEtiqueta || 'si') !== 'no' };
+  return A.dis;
+}
+
+// Fondo del cartel: plantilla subida o diseño por defecto
+function fondo() {
+  var cv = document.createElement('canvas'); cv.width = PW; cv.height = PH; var c = cv.getContext('2d');
+  if (A.tpl) {
+    var s = Math.max(PW / A.tpl.width, PH / A.tpl.height), w = A.tpl.width * s, h = A.tpl.height * s;
+    c.imageSmoothingQuality = 'high'; c.drawImage(A.tpl, (PW - w) / 2, (PH - h) / 2, w, h);
+    return cv;
+  }
+  var g = c.createLinearGradient(0, 0, 0, PH); g.addColorStop(0, '#FFFFFF'); g.addColorStop(1, '#E4F1FD'); c.fillStyle = g; c.fillRect(0, 0, PW, PH);
+  c.fillStyle = gradiente(c, 0, 0, PW, 300); c.fillRect(0, 0, PW, 300);
+  dibujarLogo(c, 90, 55, 300, '#fff');
+  c.fillStyle = '#fff'; c.textAlign = 'center'; c.font = '800 64px Poppins'; c.fillText('PIEZAS DE UNA', PW / 2, 120);
+  c.font = '900 120px Poppins'; c.fillText('VOCACIÓN', PW / 2, 235);
+  c.fillStyle = SKY; roundRect(c, PW / 2 - 470, PH - 150, 940, 76, 38); c.fill();
+  c.fillStyle = NAVY; c.font = '700 38px "Nunito Sans"'; c.fillText('Gymkana de orientación · Levántate y anda', PW / 2, PH - 99);
+  return cv;
+}
+
+// Bloque central: QR cuadrado + etiqueta. Devuelve su lienzo y su posición en el cartel.
+function bloqueQR(p) {
+  var d = diseno(), q = Math.round(d.tam * PH), pad = Math.round(q * 0.06), r = Math.round(q * 0.07), B = q + pad * 2;
+  var etqH = d.etq ? Math.round(q * 0.17) : 0, gap = d.etq ? Math.round(q * 0.05) : 0, fs = Math.round(etqH * 0.46);
+  var txt = p.nombre + (p.tipo === 'prueba' ? '  🧩' : ''), pw = 0, tw = 0;
+  var m = document.createElement('canvas').getContext('2d');
+  if (d.etq) { m.font = '700 ' + fs + 'px Poppins'; tw = Math.min(m.measureText(txt).width, PW * 0.8); pw = etqH + tw + etqH * 0.7; }
+  var cw = Math.ceil(Math.max(B, pw)) + 24, ch = B + gap + etqH + 24;
+  var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch; var c = cv.getContext('2d');
+  var ox = Math.round((cw - B) / 2), oy = 10;
+  c.shadowColor = 'rgba(11,46,107,.18)'; c.shadowBlur = 14; c.shadowOffsetY = 4;
+  c.fillStyle = '#fff'; roundRect(c, ox, oy, B, B, r); c.fill();
+  c.shadowColor = 'transparent';
+  c.strokeStyle = '#BFDDF8'; c.lineWidth = 4; roundRect(c, ox, oy, B, B, r); c.stroke();
+  dibujarQR(c, urlPunto(p), ox + pad, oy + pad, q);
+  if (d.etq) {
+    var ey = oy + B + gap, px = Math.round((cw - pw) / 2);
+    c.fillStyle = gradiente(c, px, ey, px + pw, ey + etqH); roundRect(c, px, ey, pw, etqH, etqH / 2); c.fill();
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(px + etqH / 2, ey + etqH / 2, etqH / 2 - 7, 0, Math.PI * 2); c.fill();
+    c.textBaseline = 'middle';
+    c.fillStyle = NAVY; c.textAlign = 'center'; c.font = '800 ' + fs + 'px Poppins'; c.fillText(String(p.orden), px + etqH / 2, ey + etqH / 2 + 2);
+    c.fillStyle = '#fff'; c.textAlign = 'left'; c.font = '700 ' + fs + 'px Poppins'; c.fillText(txt, px + etqH * 1.2, ey + etqH / 2 + 2, tw);
+  }
+  return { canvas: cv, x: Math.round(PW / 2 - cw / 2), y: Math.round(d.y * PH - B / 2 - oy) };
+}
+function cartel(p, bg) {
+  var cv = document.createElement('canvas'); cv.width = PW; cv.height = PH; var c = cv.getContext('2d');
+  c.drawImage(bg || fondo(), 0, 0);
+  var b = bloqueQR(p); c.drawImage(b.canvas, b.x, b.y);
+  return cv;
+}
+
+// Tarjeta de equipo: A5 apaisado (150 ppp) 1240 × 874
+function tarjeta(t) {
+  var W = 1240, Hh = 874, cv = document.createElement('canvas'); cv.width = W; cv.height = Hh;
+  var c = cv.getContext('2d');
+  var g = c.createLinearGradient(0, 0, 0, Hh); g.addColorStop(0, '#FFFFFF'); g.addColorStop(1, '#EEF6FE'); c.fillStyle = g; c.fillRect(0, 0, W, Hh);
+  c.strokeStyle = '#C9DDF2'; c.setLineDash([12, 10]); c.lineWidth = 2; c.strokeRect(6, 6, W - 12, Hh - 12); c.setLineDash([]);
+  c.fillStyle = gradiente(c, 0, 0, W, 150); c.fillRect(6, 6, W - 12, 150);
+  dibujarLogo(c, 40, 26, 170, '#fff');
+  c.fillStyle = '#fff'; c.textAlign = 'left'; c.font = '800 30px Poppins'; c.fillText('PIEZAS DE UNA', 240, 70); c.font = '900 56px Poppins'; c.fillText('VOCACIÓN', 236, 124);
+  c.fillStyle = '#fff'; c.beginPath(); c.arc(W - 74, 80, 36, 0, Math.PI * 2); c.fill(); c.fillStyle = t.color; c.beginPath(); c.arc(W - 74, 80, 27, 0, Math.PI * 2); c.fill();
+  c.fillStyle = NAVY; c.font = '800 62px Poppins'; c.fillText(t.nombre, 60, 250);
+  c.fillStyle = '#5A6B85'; c.font = '700 24px "Nunito Sans"'; c.fillText('CÓDIGO DEL EQUIPO', 60, 300);
+  c.fillStyle = t.color; c.font = '800 72px Poppins'; c.fillText(t.codigo.split('').join(' '), 60, 380);
+  c.fillStyle = NAVY; c.font = '700 28px Poppins'; c.fillText('Vuestra primera pista', 60, 450);
+  c.fillStyle = '#0F1E36'; c.font = '400 27px "Nunito Sans"';
+  var hgt = wrap(c, t.primeraPista, 60, 492, 700, 37, 8);
+  if (t.primeraDireccion) { c.fillStyle = BLUE; c.font = '700 25px "Nunito Sans"'; wrap(c, '🧭 ' + t.primeraDireccion, 60, 492 + hgt + 12, 700, 33, 2); }
+  var qs = 320, qx = W - qs - 70, qy = 210;
+  c.fillStyle = '#fff'; roundRect(c, qx - 18, qy - 18, qs + 36, qs + 36, 22); c.fill(); c.strokeStyle = '#BFDDF8'; c.lineWidth = 3; c.stroke();
+  dibujarQR(c, urlEquipo(t), qx, qy, qs);
+  c.textAlign = 'center'; c.fillStyle = NAVY; c.font = '700 23px "Nunito Sans"';
+  wrap(c, 'Escanead este código para entrar en la app con vuestro equipo', qx + qs / 2, qy + qs + 56, qs + 30, 29, 2);
+  c.fillStyle = '#5A6B85'; c.font = '400 21px "Nunito Sans"'; c.fillText('Salida: ' + t.nombreSalida, qx + qs / 2, Hh - 50);
+  return cv;
+}
+
+// ───── QR: pestaña ─────
+function cargarQR() {
+  var tplP = A.tplCargada ? Promise.resolve() : adm('adminGetTemplate').then(function (t) {
+    A.tplCargada = true;
+    if (!t) { A.tpl = null; return; }
+    return new Promise(function (res) { var im = new Image(); im.onload = function () { A.tpl = im; res(); }; im.onerror = function () { A.tpl = null; res(); }; im.src = 'data:' + t.mime + ';base64,' + t.data; });
+  }).catch(function () { A.tplCargada = true; });
+  return Promise.all([adm('adminGetPoints'), tplP, fuentes()]).then(function (r) { A.puntos = r[0]; pintarControles(); pintarPrevia(); pintarQR(); });
+}
+function pintarControles() {
+  var d = diseno();
+  $('qrTam').value = d.tam; $('qrY').value = d.y; $('qrEtq').checked = d.etq;
+  $('tamVal').textContent = Math.round(d.tam * 100) + ' % del alto'; $('yVal').textContent = Math.round(d.y * 100) + ' %';
+  $('tplMsg').textContent = A.tpl ? 'Plantilla cargada (' + A.tpl.width + ' × ' + A.tpl.height + ' px).' : 'Sin plantilla: se usa el diseño por defecto.';
+  var sel = $('prevPoint'), prev = sel.value; sel.innerHTML = '';
+  A.puntos.forEach(function (p) { var o = el('option', '', 'Vista previa: ' + p.orden + '. ' + p.nombre); o.value = p.orden; sel.appendChild(o); });
+  sel.value = prev || (A.puntos[12] ? 12 : 0);
+}
+function pintarPrevia() {
+  var cv = $('designPrev'), c = cv.getContext('2d');
+  var p = A.puntos.filter(function (x) { return String(x.orden) === String($('prevPoint').value); })[0] || A.puntos[0];
+  if (!p) return;
+  c.clearRect(0, 0, cv.width, cv.height); c.drawImage(cartel(p), 0, 0, cv.width, cv.height);
+}
+$('qrTam').oninput = function () { diseno().tam = Number(this.value); pintarControles(); pintarPrevia(); };
+$('qrY').oninput = function () { diseno().y = Number(this.value); pintarControles(); pintarPrevia(); };
+$('qrEtq').onchange = function () { diseno().etq = this.checked; pintarPrevia(); };
+$('prevPoint').onchange = pintarPrevia;
+$('saveDesign').onclick = function () {
+  var d = diseno();
+  adm('adminSaveConfig', { qrTam: d.tam, qrY: d.y, qrEtiqueta: d.etq ? 'si' : 'no' }).then(function () { toast('Diseño guardado'); refresh(true); }).catch(function (e) { toast(clean(e)); });
+};
+$('tplBtn').onclick = function () { $('tplInput').value = ''; $('tplInput').click(); };
+$('tplInput').onchange = function () {
+  var f = this.files && this.files[0]; if (!f) return;
+  $('tplMsg').textContent = 'Preparando la plantilla…';
+  var fr = new FileReader();
+  fr.onload = function () {
+    var im = new Image();
+    im.onload = function () {
+      // Se normaliza a A4 horizontal (máx. 3508 px de ancho) para que pese poco y se imprima bien
+      var s = Math.min(1, 3508 / im.width), cv = document.createElement('canvas'); cv.width = Math.round(im.width * s); cv.height = Math.round(im.height * s);
+      cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+      var data = String(fr.result), mime = f.type || 'image/png';
+      if (s < 1 || data.length > 6e6) { data = cv.toDataURL('image/jpeg', 0.92); mime = 'image/jpeg'; }
+      if (im.width < im.height) toast('Atención: la plantilla es vertical. El cartel se imprime en horizontal.');
+      $('tplMsg').textContent = 'Subiendo a Drive…';
+      adm('adminSaveTemplate', data.split(',')[1], mime).then(function () {
+        var fin = new Image(); fin.onload = function () { A.tpl = fin; pintarControles(); pintarPrevia(); toast('Plantilla guardada'); }; fin.src = data;
+      }).catch(function (e) { $('tplMsg').textContent = 'Error: ' + clean(e); });
+    };
+    im.onerror = function () { $('tplMsg').textContent = 'No se ha podido leer la imagen.'; };
+    im.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+};
+$('tplDel').onclick = function () {
+  confirmar('Quitar plantilla', 'Los carteles volverán al diseño por defecto.', 'Quitar', function () {
+    adm('adminDeleteTemplate').then(function () { A.tpl = null; pintarControles(); pintarPrevia(); toast('Plantilla quitada'); });
+  }, true);
+};
+function pintarQR() {
+  var g = $('qrgrid'); g.innerHTML = '';
+  A.puntos.forEach(function (p) {
+    var card = el('div', 'qrc'); var cv = document.createElement('canvas'); cv.width = 300; cv.height = 300;
+    dibujarQR(cv.getContext('2d'), urlPunto(p), 0, 0, 300);
+    card.appendChild(cv); card.appendChild(el('b', '', p.orden + '. ' + p.nombre + (p.tipo === 'prueba' ? ' 🧩' : '')));
+    var b = el('button', 'btn sm', '⬇ PNG'); b.onclick = function () { fuentes().then(function () { cartel(p).toBlob(function (bl) { descargar(bl, nombreArchivo(p) + '.png'); }); }); };
+    card.appendChild(b); g.appendChild(card);
+  });
+}
+$('baseUrl').onchange = function () { localStorageSet('pdv_url', $('baseUrl').value.trim()); if (A.tab === 'qr' && A.puntos) { pintarQR(); pintarPrevia(); } };
+$('saveUrl').onclick = function () {
+  var u = $('baseUrl').value.trim();
+  if (u && !/^https:\/\//.test(u)) { toast('La dirección debe empezar por https://'); return; }
+  localStorageSet('pdv_url', u);
+  adm('adminSaveConfig', { urlEquipos: u }).then(function () { toast('Dirección guardada: los QR y las tarjetas apuntarán a ella'); refresh(true); if (A.puntos) { pintarQR(); pintarPrevia(); } }).catch(function (e) { toast(clean(e)); });
+};
+function nombreArchivo(p) { return ('0' + p.orden).slice(-2) + '_' + p.nombre.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/_+$/, ''); }
+function descargar(blob, nombre) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nombre; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 5000); }
+function aDrive(blob, nombre, msgEl) {
+  msgEl.textContent = 'Subiendo a Drive…';
+  var fr = new FileReader();
+  fr.onload = function () {
+    var b64 = String(fr.result).split(',')[1];
+    adm('adminSaveFile', nombre, b64, blob.type).then(function (url) { msgEl.innerHTML = ''; var a = el('a', '', 'Abrir «' + nombre + '» en Drive'); a.href = url; a.target = '_blank'; msgEl.appendChild(a); window.open(url, '_blank'); })
+      .catch(function (e) { msgEl.textContent = 'Error: ' + clean(e); });
+  };
+  fr.readAsDataURL(blob);
+}
+function comprobarUrl() { if (!$('baseUrl').value.trim()) { toast('Falta la dirección de la app'); return false; } return true; }
+// PDF horizontal: la plantilla se incrusta una sola vez y cada página solo añade el bloque del QR (nítido y ligero)
+function pdfQR() {
+  return fuentes().then(function () {
+    var J = window.jspdf.jsPDF, doc = new J({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    var bg = fondo().toDataURL('image/jpeg', 0.9), k = 297 / PW;
+    A.puntos.forEach(function (p, i) {
+      if (i) doc.addPage('a4', 'landscape');
+      doc.addImage(bg, 'JPEG', 0, 0, 297, 210, 'fondo', 'FAST');
+      var b = bloqueQR(p);
+      doc.addImage(b.canvas.toDataURL('image/png'), 'PNG', b.x * k, b.y * k, b.canvas.width * k, b.canvas.height * k, 'qr' + i, 'FAST');
+    });
+    return doc.output('blob');
+  });
+}
+function zipQR() {
+  return fuentes().then(function () {
+    var z = new JSZip(), bg = fondo();
+    A.puntos.forEach(function (p) { z.file(nombreArchivo(p) + '.png', cartel(p, bg).toDataURL('image/png').split(',')[1], { base64: true }); });
+    return z.generateAsync({ type: 'blob' });
+  });
+}
+function conPuntos(fn) { return (A.puntos && A.tplCargada ? Promise.resolve() : cargarQR()).then(fn); }
+$('qrPdf').onclick = function () { if (!comprobarUrl()) return; $('qrMsg').textContent = 'Generando PDF…'; conPuntos(pdfQR).then(function (b) { descargar(b, 'QR_gymkana.pdf'); $('qrMsg').textContent = 'PDF listo (' + A.puntos.length + ' páginas).'; }); };
+$('qrZip').onclick = function () { if (!comprobarUrl()) return; $('qrMsg').textContent = 'Generando imágenes…'; conPuntos(zipQR).then(function (b) { descargar(b, 'QR_gymkana_PNG.zip'); $('qrMsg').textContent = 'ZIP listo.'; }); };
+$('qrPdfDrive').onclick = function () { if (!comprobarUrl()) return; $('qrMsg').textContent = 'Generando PDF…'; conPuntos(pdfQR).then(function (b) { aDrive(b, 'QR_gymkana.pdf', $('qrMsg')); }); };
+$('qrZipDrive').onclick = function () { if (!comprobarUrl()) return; $('qrMsg').textContent = 'Generando imágenes…'; conPuntos(zipQR).then(function (b) { aDrive(b, 'QR_gymkana_PNG.zip', $('qrMsg')); }); };
+
+function pdfTarjetas() {
+  return Promise.all([cargarEquipos(), fuentes()]).then(function () {
+    if (!A.teams.length) throw new Error('No hay equipos');
+    var J = window.jspdf.jsPDF, doc = new J({ unit: 'mm', format: 'a4' });
+    A.teams.forEach(function (t, i) {
+      if (i && i % 2 === 0) doc.addPage();
+      doc.addImage(tarjeta(t).toDataURL('image/png'), 'PNG', 0, (i % 2) * 148.5, 210, 148.5, undefined, 'FAST');
+    });
+    return doc.output('blob');
+  });
+}
+$('cardsPdf').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg').textContent = 'Generando…'; pdfTarjetas().then(function (b) { descargar(b, 'Tarjetas_equipos.pdf'); $('cardsMsg').textContent = 'Tarjetas listas.'; }).catch(function (e) { $('cardsMsg').textContent = clean(e); }); };
+$('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg').textContent = 'Generando…'; pdfTarjetas().then(function (b) { aDrive(b, 'Tarjetas_equipos.pdf', $('cardsMsg')); }).catch(function (e) { $('cardsMsg').textContent = clean(e); }); };
+
+// ───── Ajustes ─────
+function pintarAjustes() {
+  var c = A.data ? A.data.config : {};
+  $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
+}
+$('saveCfg').onclick = function () {
+  adm('adminSaveConfig', { alertaMin: Number($('cfgAlerta').value) || 10, mensajePatio: $('cfgPatio').value, mensajeVuelta: $('cfgVuelta').value, mensajeFinal: $('cfgFinal').value })
+    .then(function () { toast('Ajustes guardados'); refresh(true); }).catch(function (e) { toast(clean(e)); });
+};
+$('bcSend').onclick = function () {
+  var t = $('bcTxt').value.trim(); if (!t) return;
+  adm('adminSend', '*', t).then(function () { $('bcTxt').value = ''; toast('Aviso enviado a todos los equipos'); refresh(true); }).catch(function (e) { toast(clean(e)); });
+};
+$('reopenBtn').onclick = function () { adm('adminReopen').then(function () { toast('Actividad reabierta'); refresh(true); }).catch(function (e) { toast(clean(e)); }); };
+$('resetBtn').onclick = function () {
+  confirmar('Reiniciar la actividad', 'Se borrarán TODOS los escaneos y mensajes. Esta acción no se puede deshacer.', 'Sí, reiniciar', function () {
+    adm('adminReset').then(function () { toast('Actividad reiniciada'); refresh(true); }).catch(function (e) { toast(clean(e)); });
+  }, true);
+};
+</script>
+</body>
+</html>
