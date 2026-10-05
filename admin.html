@@ -374,6 +374,7 @@
         </div>
         <div class="card" style="margin-top:16px">
           <h2>PIN de administración</h2>
+          <p class="sub" id="verInfo" style="margin:0 0 6px"></p>
           <p class="sub" style="margin:0">Para cambiarlo, abre el editor de Apps Script, escribe el nuevo PIN en <code>NUEVO_PIN</code> y ejecuta la función <code>cambiarPin</code>.</p>
         </div>
       </div>
@@ -413,12 +414,22 @@ function login(pin) {
   $('loginBtn').disabled = true;
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
+    A.version = r.version || '';
+    if (A.version !== '2026.10.05-f') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
     $('baseUrl').value = localStorageGet('pdv_url') || A.url;
     refresh(true).then(function () { var u = A.data && A.data.config && A.data.config.urlEquipos; if (u) $('baseUrl').value = u; }); setInterval(refresh, 4000); setInterval(tick, 1000);
   }).catch(function (e) { $('loginBtn').disabled = false; $('loginErr').textContent = clean(e); sstore('pdv_pin', ''); });
+}
+function avisoVersion(v) {
+  var box = $('modalBox'); box.innerHTML = '';
+  box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.05-f, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
+  var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
+  $('modal').classList.remove('hidden');
 }
 function localStorageGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -446,14 +457,16 @@ function refresh(force) {
   A.busy = true;
   return adm('adminDashboard', force ? 0 : A.ver).then(function (d) {
     A.busy = false;
-    $('live').classList.remove('off'); $('liveTxt').textContent = 'En directo';
+    $('live').classList.remove('off'); $('liveTxt').textContent = 'En directo'; $('live').title = ''; A.ultimoError = null;
     A.skew = d.ahora - Date.now();
     if (d.same) { if (d.vistos && A.data) A.data.equipos.forEach(function (t) { t.visto = d.vistos[t.codigo] || t.visto; }); pintarSeguimiento(); return; }
     A.ver = d.ver; A.data = d;
     pintarSeguimiento(); pintarChat(true); tick();
   }).catch(function (e) {
     A.busy = false;
-    $('live').classList.add('off'); $('liveTxt').textContent = 'Sin conexión';
+    var msg = clean(e);
+    $('live').classList.add('off'); $('liveTxt').textContent = 'Sin conexión'; $('live').title = msg;
+    if (msg !== A.ultimoError) { A.ultimoError = msg; toast('Sin conexión: ' + msg); }
     if (/PIN/.test(clean(e))) { sstore('pdv_pin', ''); location.reload(); }
   });
 }
@@ -997,6 +1010,7 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
+  $('verInfo').textContent = 'Versión del panel: 2026.10.05-f · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
 }
