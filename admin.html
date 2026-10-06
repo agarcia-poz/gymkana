@@ -143,6 +143,13 @@
   .plist .nota-mon { grid-column: 2 / -2; background: #FFF9EA; border: 1px dashed #EAC66A; border-radius: 10px; padding: 8px 10px; }
   .plist .nota-mon label { display: block; font-size: 12px; font-weight: 800; color: #8A6400; margin-bottom: 4px; }
   .plist .nota-mon textarea { min-height: 52px; background: #fff; }
+  .letras-bar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; background: var(--line-2, #F2F6FB); border-radius: 12px; padding: 12px 14px; margin: 10px 0; }
+  .letras-bar .letras { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .letras-bar .ltr { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 46px; height: 52px; border-radius: 10px; background: #fff; border: 1.5px solid var(--line); }
+  .letras-bar .ltr b { font-size: 20px; color: var(--navy); line-height: 1; }
+  .letras-bar .ltr small { font-size: 10.5px; color: var(--muted); }
+  .letras-bar .ltr.vacia { border-style: dashed; }
+  .letras-bar .gwarn { margin: 8px 0 0; }
   .plist .pt.head { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; padding-top: 0; }
   .num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--line-2); font-weight: 700; font-variant-numeric: tabular-nums; }
   .num.prueba { background: var(--gold); } .num.inicio { background: var(--navy); color: #fff; }
@@ -381,6 +388,7 @@
       <div class="row" style="margin-bottom:6px"><div class="grow"><h2>Puntos y pistas</h2><p class="sub" style="margin:0">La pista de cada punto es la que aparece al escanear su QR y lleva al <b>siguiente</b> punto. El recorrido es <b>circular</b>: la pista del último punto lleva al punto 1. El Patio de columnas es solo la llegada: cuando un equipo completa todos los puntos, la app le pide volver allí para el reto final. Reordenar o editar no cambia los QR ya impresos.</p></div>
         <button class="btn" id="addPoint">+ Añadir punto</button><button class="btn primary" id="savePoints">Guardar cambios</button></div>
       <div id="ptAviso"></div>
+      <div class="letras-bar" id="letrasBar"></div>
       <div class="plist" id="plist"></div>
     </div>
   </section>
@@ -536,7 +544,7 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.06-i') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.06-j') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -549,7 +557,7 @@ function login(pin) {
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-i, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-j, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -1060,8 +1068,40 @@ function avisoCircular() {
   } else w.appendChild(document.createTextNode('Escribe una pista que lleve allí y guarda.'));
   box.appendChild(w);
 }
+// ───── Letras de la palabra secreta ─────
+// Cada tarjeta conserva su letra y su año (el acertijo final usa los años); solo cambia qué prueba la entrega.
+var TARJETAS = [['V', '1521'], ['O', '1534'], ['C', '1940'], ['A', '1944'], ['C', '1948'], ['I', '1949'], ['Ó', '1952'], ['N', '1993']];
+var PALABRA = TARJETAS.map(function (t) { return t[0]; }).join('');
+function pruebasEnOrden() { return A.puntos.filter(function (p, i) { return i > 0 && p.tipo === 'prueba'; }); }
+function pintarLetras() {
+  var box = $('letrasBar'); if (!box) return; box.innerHTML = '';
+  var pr = pruebasEnOrden(), seq = pr.map(function (p) { return (p.letra || '·') + ''; });
+  var t = el('div', 'grow');
+  t.appendChild(el('b', '', '🔤 Palabra secreta: ' + PALABRA));
+  var fila = el('div', 'letras'); pr.forEach(function (p) { var c = el('span', 'ltr' + (p.letra ? '' : ' vacia')); c.appendChild(el('b', '', p.letra || '?')); c.appendChild(el('small', '', p.anio || '')); c.title = p.nombre; fila.appendChild(c); });
+  t.appendChild(el('div', 'small muted', 'Letras en el orden del recorrido (' + pr.length + ' pruebas):')); t.appendChild(fila);
+  var ok = seq.slice().sort().join('') === PALABRA.split('').sort().join('');
+  if (!ok) t.appendChild(el('div', 'gwarn', '⚠ Las letras de las pruebas no forman ' + PALABRA + '. Pulsa «Repartir al azar» y guarda.'));
+  box.appendChild(t);
+  var b = el('button', 'btn gold', '🔀 Repartir las letras al azar');
+  b.onclick = function () {
+    if (pr.length !== TARJETAS.length) { toast('Hacen falta exactamente ' + TARJETAS.length + ' pruebas (ahora hay ' + pr.length + ').'); return; }
+    var mejor = null;
+    for (var intento = 0; intento < 500; intento++) {
+      var perm = TARJETAS.slice(); for (var i = perm.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = perm[i]; perm[i] = perm[j]; perm[j] = x; }
+      // que en el recorrido (circular) no salgan dos letras seguidas de la palabra
+      var malo = 0;
+      for (var k = 0; k < perm.length; k++) { var par = perm[k][0] + perm[(k + 1) % perm.length][0]; if (PALABRA.indexOf(par) >= 0) malo++; }
+      if (!mejor || malo < mejor.malo) mejor = { perm: perm, malo: malo };
+      if (!malo) break;
+    }
+    pr.forEach(function (p, i) { p.letra = mejor.perm[i][0]; p.anio = mejor.perm[i][1]; });
+    pintarPuntos(); toast('Letras repartidas. Revisa y pulsa «Guardar cambios».');
+  };
+  box.appendChild(b);
+}
 function pintarPuntos() {
-  avisoCircular();
+  avisoCircular(); pintarLetras();
   var box = $('plist'); box.innerHTML = '';
   var h = el('div', 'pt head'); ['#', 'Lugar', 'Tipo', 'Letra', 'Año', 'Pista (lleva al siguiente punto)', 'Dirección 🧭', ''].forEach(function (x) { h.appendChild(el('div', '', x)); }); box.appendChild(h);
   A.puntos.forEach(function (p, i) {
@@ -1355,7 +1395,7 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.06-i · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.06-j · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgOrden').checked = String(c.ordenEstricto || 'si') !== 'no';
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
