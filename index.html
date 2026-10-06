@@ -203,6 +203,11 @@
   .found.celebra .tick { animation: boing .7s cubic-bezier(.3,1.6,.5,1) both; }
   @keyframes boing { 0% { transform: scale(0) rotate(-40deg); } 100% { transform: scale(1) rotate(0); } }
   @keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(31,138,85,.55); } 100% { box-shadow: 0 0 0 22px rgba(31,138,85,0); } }
+  .vuelta h1 { font-size: 30px; line-height: 1.15; margin: 4px 0 8px; }
+  .vuelta .emoji { font-size: 64px; animation: boing .9s cubic-bezier(.3,1.6,.5,1) both; }
+  .pasos-final { margin-top: 16px; text-align: left; display: grid; gap: 8px; }
+  .pasos-final div { display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,.12); border-radius: 12px; padding: 10px 12px; font-size: 15.5px; }
+  .pasos-final b { flex: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; color: var(--navy); display: grid; place-items: center; font-family: 'Poppins', sans-serif; font-size: 14px; }
   .finale { text-align: center; }
   .finale .trofeo { font-size: 72px; line-height: 1; animation: boing .9s cubic-bezier(.3,1.6,.5,1) both; }
   .finale .crono { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 40px; margin: 6px 0 2px; letter-spacing: .02em; }
@@ -299,7 +304,7 @@
   })();
   // Se limpia la dirección para que recargar la página no vuelva a escanear el mismo QR
   if (INIT.q || INIT.t) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
-  var VERSION_PAGINA = '2026.10.06-e';
+  var VERSION_PAGINA = '2026.10.06-g';
   var KEY = 'pdv_equipo';
   var POLL_MS = 5000;
   var S = { codigo: null, equipo: null, ver: 0, ultimoTs: -1, pantalla: null, mensajes: [], chatOpen: false, poll: null, busy: false, cola: [], seq: 0, escaneando: false };
@@ -452,6 +457,7 @@
   }
 
   function mostrar(r) {
+    if (!sesionValida(r)) return;
     S.repintar = false;
     var veniaDeEspera = S.pantalla === 'espera', prevTs = S.ultimoTs, prevPantalla = S.pantalla;
     var nuevo = S.recien || prevTs !== -1 && r.ultimoTs > prevTs && r.repetido !== true;
@@ -505,10 +511,21 @@
       nodos.push(el('p', 'hint', 'Cuando encontréis el siguiente lugar, pulsad «Escanear QR».'));
       if (nuevo) celebrar('ok');
     } else if (r.pantalla === 'vuelta') {
-      var v = el('div', 'card big');
+      if (r.punto && r.punto.orden !== 0) {
+        var fv = el('div', 'card found' + (nuevo ? ' celebra' : ''));
+        fv.appendChild(el('div', 'tick', '✓'));
+        var tv = el('div'); tv.appendChild(el('div', 'place', r.punto.nombre)); tv.appendChild(el('div', 'sub', 'Último lugar del recorrido')); fv.appendChild(tv);
+        nodos.push(fv);
+        if (r.punto.tipo === 'prueba') { var pv = el('div', 'callout prueba'); pv.innerHTML = '<b>🧩 Antes de volver:</b> superad esta última prueba con el monitor para conseguir vuestra letra.'; nodos.push(pv); }
+      }
+      var v = el('div', 'card big dark vuelta');
       v.appendChild(el('div', 'emoji', '🏁'));
-      v.appendChild(el('h1', '', '¡Recorrido completado!'));
+      v.appendChild(el('div', 'eyebrow', '¡Recorrido completado!'));
+      v.appendChild(el('h1', '', 'Volved al Patio de columnas'));
       v.appendChild(el('p', '', r.mensaje));
+      var pasos = el('div', 'pasos-final');
+      ['Reunid a todo el equipo y llevad todas vuestras letras.', 'En el Patio, pulsad «Escanear QR» y escanead su código.', 'Allí os espera el reto final.'].forEach(function (x, i) { var d = el('div'); d.appendChild(el('b', '', String(i + 1))); d.appendChild(el('span', '', x)); pasos.appendChild(d); });
+      v.appendChild(pasos);
       nodos.push(v);
       if (nuevo || prevPantalla === 'pista' || prevPantalla === 'inicio') celebrar('vuelta');
     } else if (r.pantalla === 'final') {
@@ -605,7 +622,21 @@
   function duracion(ms) { var s = Math.max(0, Math.round(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + ('0' + m).slice(-2) : m) + ':' + ('0' + x).slice(-2); }
 
   // ───── Flujo ─────
-  function setEquipo(eq) { S.codigo = eq.codigo; S.equipo = eq; store(KEY, eq.codigo); pintarCabecera({ equipo: eq }); cargarLista(); }
+  // Si la coordinación reinicia la actividad «desconectando los móviles», cada móvil olvida su equipo
+  function sesionValida(r) {
+    if (!r || r.sesion === undefined) return true;
+    var mia = store('pdv_sesion') || '';
+    if (String(r.sesion) === mia) return true;
+    desvincular(); return false;
+  }
+  function desvincular(token) {
+    store(KEY, null); store('pdv_sesion', null);
+    S.codigo = null; S.equipo = null; S.ver = 0; S.ultimoTs = -1; S.pantalla = null; S.mensajes = []; S.cola = [];
+    L.datos = null; $('teambar').classList.remove('on'); $('listaSheet').classList.remove('on'); $('sheet').classList.remove('on');
+    if (token) INIT.q = token;
+    pantallaLogin('La coordinación ha reiniciado la actividad. Volved a escanear la tarjeta de vuestro equipo (o escribid su código).');
+  }
+  function setEquipo(eq) { S.codigo = eq.codigo; S.equipo = eq; store(KEY, eq.codigo); if (eq.sesion !== undefined) store('pdv_sesion', String(eq.sesion)); pintarCabecera({ equipo: eq }); cargarLista(); }
 
   // ───── Pasar lista (capitanía) ─────
   var L = { datos: null, pend: 0, abierta: false, t: null };
@@ -688,7 +719,7 @@
     b.onclick = function () { cancelado = true; comprobar('Lo comprobamos en segundo plano: si el QR quedó registrado, lo veréis en unos segundos.'); };
     var n = 0;
     function intento() {
-      return llamarApi('apiScan', [S.codigo, token, idc], n < 2 ? 12000 : 15000).catch(function (e) {
+      return llamarApi('apiScan', [S.codigo, token, idc, store('pdv_sesion') || ''], n < 2 ? 12000 : 15000).catch(function (e) {
         if (e.red && n < 2 && !cancelado) { n++; return new Promise(function (ok) { setTimeout(ok, 600 * n); }).then(intento); }
         throw e;
       });
@@ -701,6 +732,7 @@
       var m = cleanMsg(e);
       fin();
       if (/ningún equipo/.test(m)) { store(KEY, null); INIT.q = token; pantallaLogin(m); return; }
+      if (/^SESION/.test(m)) { desvincular(token); return; }
       if (/no ha empezado|ha terminado/.test(m)) { S.ultimoTs = -1; S.ver = 0; toast(m); poll(); return; }
       if (e.red) { comprobar('Conexión lenta: comprobando si el QR se ha registrado…'); return; }
       pantallaError(m, true);
@@ -714,7 +746,7 @@
     } else {
       if (!$('main').querySelector('.amable')) render([esperaAmable('Cargando vuestra pantalla…')]);
       else calmar($('main').querySelector('.amable').appendChild(el('p', 'calma')), 2500);
-      api('apiState', S.codigo, 0).then(function (r) { S.ver = r.ver; mostrar(r); procesarMensajes(r.mensajes || [], true); arrancarPoll(); })
+      api('apiState', S.codigo, 0, store('pdv_sesion') || '').then(function (r) { if (!sesionValida(r)) return; S.ver = r.ver; mostrar(r); procesarMensajes(r.mensajes || [], true); arrancarPoll(); })
         .catch(function (e) { store(KEY, null); pantallaLogin(cleanMsg(e)); });
     }
   }
@@ -733,10 +765,11 @@
     if (S.busy && !S.forzar) return;
     S.forzar = false; S.busy = true;
     var enEspera = S.pantalla === 'espera', mio = S.seq;
-    llamarApi('apiState', [S.codigo, S.ver, enEspera], 10000).then(function (r) {
+    llamarApi('apiState', [S.codigo, S.ver, enEspera, store('pdv_sesion') || ''], 10000).then(function (r) {
       S.busy = false; red(true);
       if (mio !== S.seq || S.escaneando) return; // respuesta anterior a un escaneo: se descarta
       if (r.same) { if (enEspera && r.conectados !== undefined) pintarConectados(r.conectados, S.totalEquipos); return; }
+      if (!sesionValida(r)) return;
       S.ver = r.ver; if (!L.abierta) cargarLista();
       var especial = function (p) { return p === 'espera' || p === 'terminada'; };
       if (S.repintar || r.ultimoTs !== S.ultimoTs || r.pantalla !== S.pantalla && (especial(r.pantalla) || especial(S.pantalla))) mostrar(r);

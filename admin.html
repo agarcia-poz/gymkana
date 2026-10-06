@@ -371,8 +371,9 @@
   <!-- PUNTOS -->
   <section class="wrap tab hidden" id="tab-puntos">
     <div class="card">
-      <div class="row" style="margin-bottom:6px"><div class="grow"><h2>Puntos y pistas</h2><p class="sub" style="margin:0">La pista de cada punto es la que aparece al escanear su QR y lleva al <b>siguiente</b> punto. Reordenar o editar no cambia los QR ya impresos.</p></div>
+      <div class="row" style="margin-bottom:6px"><div class="grow"><h2>Puntos y pistas</h2><p class="sub" style="margin:0">La pista de cada punto es la que aparece al escanear su QR y lleva al <b>siguiente</b> punto. El recorrido es <b>circular</b>: la pista del último punto lleva al punto 1. El Patio de columnas es solo la llegada: cuando un equipo completa todos los puntos, la app le pide volver allí para el reto final. Reordenar o editar no cambia los QR ya impresos.</p></div>
         <button class="btn" id="addPoint">+ Añadir punto</button><button class="btn primary" id="savePoints">Guardar cambios</button></div>
+      <div id="ptAviso"></div>
       <div class="plist" id="plist"></div>
     </div>
   </section>
@@ -442,8 +443,9 @@
         </div>
         <div class="card" style="margin-top:16px">
           <h2>Reiniciar la actividad</h2>
-          <p class="sub">Borra todos los escaneos y mensajes, pone el reloj a cero y devuelve a los equipos a la sala de espera. Los equipos y los puntos se mantienen. Úsalo después de las pruebas y antes de empezar de verdad.</p>
-          <button class="btn danger" id="resetBtn">Reiniciar escaneos y chat</button>
+          <p class="sub">Borra todos los escaneos, mensajes y listas de asistencia, pone el reloj a cero y devuelve a los equipos a la sala de espera. Se mantienen los equipos (con sus códigos y tarjetas), el alumnado y los puntos. Úsalo después de las pruebas y antes de empezar de verdad.</p>
+          <label class="row small" style="gap:8px;margin:4px 0 12px;cursor:pointer"><input type="checkbox" id="resetDesv" checked> <span><b>Desconectar también todos los móviles.</b> Olvidarán su equipo y tendrán que volver a escanear la tarjeta. Así nadie aparece «en línea» por las pruebas.</span></label>
+          <button class="btn danger" id="resetBtn">Reiniciar la actividad</button>
         </div>
         <div class="card hidden" id="reopenBox" style="margin-top:16px">
           <h2>Reabrir la actividad</h2>
@@ -526,7 +528,7 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.06-e') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.06-g') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -539,7 +541,7 @@ function login(pin) {
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-e, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-g, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -1037,7 +1039,21 @@ $('saveTeams').onclick = function () { adm('adminSaveTeams', A.teams).then(funct
 
 // ───── Puntos ─────
 function cargarPuntos() { return adm('adminGetPoints').then(function (p) { A.puntos = p; pintarPuntos(); }); }
+function avisoCircular() {
+  var box = $('ptAviso'); box.innerHTML = '';
+  var ult = A.puntos[A.puntos.length - 1], patio = A.puntos[0];
+  if (!ult || A.puntos.length < 3 || !/patio/i.test(ult.pista || '')) return;
+  var w = el('div', 'gwarn'); w.style.margin = '10px 0';
+  w.appendChild(document.createTextNode('⚠ La pista del último punto («' + ult.nombre + '») envía al Patio de columnas. Con el recorrido circular debe llevar al punto 1 («' + (A.puntos[1] ? A.puntos[1].nombre : '') + '»). '));
+  if (patio && patio.pista && !/patio/i.test(patio.pista)) {
+    var b = el('button', 'btn sm', 'Usar la pista del Patio en el último punto');
+    b.onclick = function () { ult.pista = patio.pista; ult.direccion = patio.direccion || ult.direccion; patio.pista = ''; patio.direccion = ''; pintarPuntos(); toast('Pista copiada. Revisa y pulsa «Guardar cambios».'); };
+    w.appendChild(b);
+  } else w.appendChild(document.createTextNode('Escribe una pista que lleve allí y guarda.'));
+  box.appendChild(w);
+}
 function pintarPuntos() {
+  avisoCircular();
   var box = $('plist'); box.innerHTML = '';
   var h = el('div', 'pt head'); ['#', 'Lugar', 'Tipo', 'Letra', 'Año', 'Pista (lleva al siguiente punto)', 'Dirección 🧭', ''].forEach(function (x) { h.appendChild(el('div', '', x)); }); box.appendChild(h);
   A.puntos.forEach(function (p, i) {
@@ -1326,7 +1342,7 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.06-e · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.06-g · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
 }
@@ -1344,8 +1360,9 @@ $('monPinBtn').onclick = function () {
 };
 $('reopenBtn').onclick = function () { adm('adminReopen').then(function () { toast('Actividad reabierta'); refresh(true); }).catch(function (e) { toast(clean(e)); }); };
 $('resetBtn').onclick = function () {
-  confirmar('Reiniciar la actividad', 'Se borrarán TODOS los escaneos y mensajes. Esta acción no se puede deshacer.', 'Sí, reiniciar', function () {
-    adm('adminReset').then(function () { toast('Actividad reiniciada'); refresh(true); }).catch(function (e) { toast(clean(e)); });
+  var desv = $('resetDesv').checked;
+  confirmar('Reiniciar la actividad', 'Se borrarán TODOS los escaneos, mensajes y listas de asistencia. Los equipos, sus códigos y el alumnado se mantienen.' + (desv ? ' Además, todos los móviles se desconectarán y tendrán que volver a escanear la tarjeta de su equipo.' : '') + ' Esta acción no se puede deshacer.', 'Sí, reiniciar', function () {
+    adm('adminReset', desv).then(function () { toast(desv ? 'Actividad reiniciada y móviles desconectados' : 'Actividad reiniciada'); refresh(true); }).catch(function (e) { toast(clean(e)); });
   }, true);
 };
 </script>

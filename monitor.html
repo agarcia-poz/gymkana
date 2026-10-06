@@ -194,13 +194,16 @@ $('sel').onchange = function () { store('pdv_mon_est', $('sel').value); pintar()
 function nombrePunto(o) { var p = M.data.puntos.filter(function (x) { return x.orden === o; })[0]; return p ? p.nombre : '—'; }
 function visitados(t) { var v = {}; t.escaneos.forEach(function (s) { v[s.orden] = s.ts; }); return v; }
 // Cuántos lugares le faltan al equipo para llegar a la estación (0 = es su siguiente destino)
+// Recorrido circular por los puntos 1…N-1 (tras el último viene el 1); el Patio solo cuenta al final
 function distancia(t, est) {
   if (t.esperado === '' || t.esperado === null || t.esperado === undefined) return null;
-  var N = M.data.puntos.length, v = visitados(t), k = 0;
-  for (var i = 0; i < N; i++) {
-    var c = (Number(t.esperado) + i) % N;
-    if (c === est) return k;
-    if (c !== 0 && !v[c]) k++;
+  if (Number(est) === 0) return Number(t.esperado) === 0 ? 0 : null;
+  if (Number(t.esperado) === 0) return null;
+  var NP = M.data.puntos.length - 1, v = visitados(t), k = 0;
+  for (var i = 0; i < NP; i++) {
+    var c = ((Number(t.esperado) - 1 + i) % NP) + 1;
+    if (c === Number(est)) return k;
+    if (!v[c]) k++;
   }
   return null;
 }
