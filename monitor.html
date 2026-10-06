@@ -159,7 +159,7 @@ if (sstore('pdv_mon')) login(sstore('pdv_mon'));
 function bucle() { setTimeout(function () { refresh().then(bucle, bucle); }, M.fallos ? Math.min(20000, 5000 * (1 + M.fallos)) : 5000); }
 function refresh(force) {
   if (M.busy && !force) return Promise.resolve(); M.busy = true;
-  return api('monitorDashboard', M.pin, force ? 0 : M.ver).then(function (d) {
+  return llamarApi('monitorDashboard', [M.pin, force ? 0 : M.ver], 12000).then(function (d) {
     M.busy = false; M.fallos = 0; M.skew = d.ahora - Date.now();
     $('dot').className = 'dot';
     if (!d.same) { M.ver = d.ver; M.data = d; pintarSelector(); }

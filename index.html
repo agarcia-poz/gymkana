@@ -97,11 +97,41 @@
   .fab .help { flex: 1; background: #fff; color: var(--navy); border: 1.5px solid var(--line); position: relative; }
   .badge { position: absolute; top: -7px; right: -5px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--err); color: #fff; font-size: 13px; display: none; place-items: center; font-family: 'Nunito Sans', sans-serif; }
   .badge.on { display: grid; }
+  .registrando { text-align: center; }
+  .registrando h2 { margin: 6px 0 4px; }
+  .registrando .lento { margin-top: 14px; font-size: 15px; color: var(--muted); display: none; }
+  .registrando.tarde .lento { display: block; }
+  .registrando .btn { margin-top: 14px; display: none; }
+  .registrando.tarde .btn { display: inline-block; }
   .spinner { width: 34px; height: 34px; border-radius: 50%; border: 4px solid var(--line); border-top-color: var(--bright); animation: spin 0.9s linear infinite; margin: 30px auto; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .pop { animation: pop .45s ease; }
   @keyframes pop { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
   /* chat */
+  /* pasar lista */
+  .listabtn { margin-left: 8px; background: var(--pale); border-radius: 99px; height: 34px; padding: 0 12px; font-weight: 800; font-size: 13.5px; color: var(--navy); flex: none; display: none; }
+  .listabtn.on { display: inline-flex; align-items: center; gap: 4px; }
+  .listabtn.ok { background: var(--ok-soft); color: var(--ok); }
+  .pasar { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: #fff; border: 1.5px solid var(--line); text-align: left; }
+  .pasar b { font-family: 'Poppins', sans-serif; color: var(--navy); font-size: 16px; display: block; }
+  .pasar small { color: var(--muted); font-size: 13.5px; }
+  .pasar .ico { font-size: 28px; }
+  .pasar .n { margin-left: auto; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 20px; color: var(--navy); }
+  .pasar.ok { border-color: #BFE3CF; background: var(--ok-soft); } .pasar.ok .n { color: var(--ok); }
+  .lst { flex: 1; overflow-y: auto; padding: 12px 14px 8px; }
+  .lst .caps { background: #FFF6DF; color: #7A5300; border-radius: 12px; padding: 10px 12px; font-size: 14.5px; margin-bottom: 12px; }
+  .lst .cnt { display: flex; align-items: baseline; gap: 8px; margin: 4px 2px 6px; }
+  .lst .cnt b { font-family: 'Poppins', sans-serif; font-size: 26px; color: var(--navy); }
+  .lst .cnt span { color: var(--muted); font-weight: 700; }
+  .lst .cnt button { margin-left: auto; background: #fff; border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; font-weight: 700; font-size: 13.5px; color: var(--navy); }
+  .lst h3 { font-family: 'Poppins', sans-serif; font-size: 12.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 16px 2px 6px; }
+  .pers { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; margin-bottom: 6px; border-radius: 12px; background: #fff; border: 1.5px solid var(--line); font-size: 16px; text-align: left; color: var(--ink); }
+  .pers .box { width: 26px; height: 26px; border-radius: 8px; border: 2px solid #9DB6D3; flex: none; display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 16px; transition: all .15s; }
+  .pers.on { border-color: #BFE3CF; background: var(--ok-soft); }
+  .pers.on .box { background: var(--ok); border-color: var(--ok); }
+  .pers.pend { opacity: .75; }
+  .lst-foot { padding: 10px 14px 16px; border-top: 1px solid var(--line); }
+  .lst-foot .btn { width: 100%; }
   .sheet { position: fixed; inset: 0; background: rgba(11,30,60,.45); display: none; z-index: 10; }
   .sheet.on { display: block; }
   .panel { position: absolute; left: 0; right: 0; bottom: 0; max-width: 520px; margin: 0 auto; background: var(--bg); border-radius: 22px 22px 0 0; height: 82vh; display: flex; flex-direction: column; animation: up .25s ease; }
@@ -191,7 +221,7 @@
     <div class="pill">Gymkana de orientación · Levántate y anda</div>
   </header>
   <div class="teambar" id="teambar">
-    <div class="team" id="team"><span class="dot"></span><span class="name" id="teamName"></span><span class="code" id="teamCode"></span><button class="sonido" id="sonido" aria-label="Sonido">🔊</button></div>
+    <div class="team" id="team"><span class="dot"></span><span class="name" id="teamName"></span><span class="code" id="teamCode"></span><button class="listabtn" id="listaBtn" aria-label="Pasar lista">📋 <span id="listaN"></span></button><button class="sonido" id="sonido" aria-label="Sonido">🔊</button></div>
     <div class="progress" id="progress"><div class="bar"><i id="barFill"></i></div><small id="progressTxt"></small></div>
   </div>
   <main id="main"><div class="spinner"></div></main>
@@ -215,6 +245,15 @@
     <p id="scanHelp">Apunta al código QR del lugar. Se leerá solo.</p>
     <button class="btn" id="photoBtn">📸 Hacer una foto al QR</button>
     <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+  </div>
+</div>
+
+<!-- Pasar lista -->
+<div class="sheet" id="listaSheet">
+  <div class="panel">
+    <div class="panel-h"><b>📋 Pasar lista</b><button id="closeLista" aria-label="Cerrar">×</button></div>
+    <div class="lst" id="lst"></div>
+    <div class="lst-foot"><button class="btn" id="listaListo">Listo</button></div>
   </div>
 </div>
 
@@ -256,7 +295,7 @@
   if (INIT.q || INIT.t) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
   var KEY = 'pdv_equipo';
   var POLL_MS = 5000;
-  var S = { codigo: null, equipo: null, ver: 0, ultimoTs: -1, pantalla: null, mensajes: [], chatOpen: false, poll: null, busy: false, cola: [] };
+  var S = { codigo: null, equipo: null, ver: 0, ultimoTs: -1, pantalla: null, mensajes: [], chatOpen: false, poll: null, busy: false, cola: [], seq: 0, escaneando: false };
 
   function $(id) { return document.getElementById(id); }
   function idCliente() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
@@ -354,7 +393,9 @@
     c.appendChild(el('h1', '', '¡Preparados!'));
     c.appendChild(el('p', '', 'Vuestro equipo ya está dentro. Cuando la coordinación dé la salida, aparecerá aquí vuestra primera pista, a la vez que al resto de equipos.'));
     var n = el('div', 'count', ''); n.id = 'waitCount'; c.appendChild(n);
+    var lb = el('div'); lb.id = 'pasarWrap'; c.appendChild(lb);
     var t = el('p', 'hint', 'No cerréis esta pantalla.');
+    setTimeout(pintarBotonLista, 0);
     return [c, t];
   }
   function pintarConectados(n, total) {
@@ -363,6 +404,7 @@
   }
 
   function mostrar(r) {
+    S.repintar = false;
     var veniaDeEspera = S.pantalla === 'espera', prevTs = S.ultimoTs, prevPantalla = S.pantalla;
     var nuevo = S.recien || prevTs !== -1 && r.ultimoTs > prevTs && r.repetido !== true;
     S.ultimoTs = r.ultimoTs; S.pantalla = r.pantalla;
@@ -514,17 +556,97 @@
   function duracion(ms) { var s = Math.max(0, Math.round(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + ('0' + m).slice(-2) : m) + ':' + ('0' + x).slice(-2); }
 
   // ───── Flujo ─────
-  function setEquipo(eq) { S.codigo = eq.codigo; S.equipo = eq; store(KEY, eq.codigo); pintarCabecera({ equipo: eq }); }
+  function setEquipo(eq) { S.codigo = eq.codigo; S.equipo = eq; store(KEY, eq.codigo); pintarCabecera({ equipo: eq }); cargarLista(); }
 
-  function escanear(token) {
-    render([el('div', 'spinner')]);
-    return api('apiScan', S.codigo, token).then(function (r) { S.recien = r.repetido === false; mostrar(r); S.recien = false; })
-      .catch(function (e) {
-        var m = cleanMsg(e);
-        if (/ningún equipo/.test(m)) { store(KEY, null); INIT.q = token; pantallaLogin(m); return; }
-        if (/no ha empezado|ha terminado/.test(m)) { S.ultimoTs = -1; S.ver = 0; toast(m); poll(); return; }
-        pantallaError(m, true);
+  // ───── Pasar lista (capitanía) ─────
+  var L = { datos: null, pend: 0, abierta: false, t: null };
+  function cargarLista() {
+    if (!S.codigo || L.pend) return Promise.resolve();
+    return llamarApi('apiRoster', [S.codigo], 12000).then(function (d) { if (!L.pend) { L.datos = d; pintarBotonLista(); if (L.abierta) pintarLista(); } }).catch(function () {});
+  }
+  function cuentaLista() { var a = (L.datos && L.datos.alumnos) || []; return { total: a.length, pres: a.filter(function (x) { return x.presente; }).length }; }
+  function pintarBotonLista() {
+    var c = cuentaLista(), b = $('listaBtn');
+    b.classList.toggle('on', c.total > 0); b.classList.toggle('ok', c.total > 0 && c.pres === c.total);
+    $('listaN').textContent = c.pres + '/' + c.total;
+    var w = $('pasarWrap'); if (!w) return; w.innerHTML = '';
+    if (!c.total) return;
+    var x = el('button', 'pasar' + (c.pres === c.total ? ' ok' : ''));
+    x.appendChild(el('span', 'ico', c.pres === c.total ? '✅' : '📋'));
+    var t = el('span'); t.appendChild(el('b', '', c.pres === c.total ? '¡Equipo completo!' : 'Pasar lista'));
+    t.appendChild(el('small', '', L.datos.capitanes.length ? 'Capitanía: ' + L.datos.capitanes.join(', ') : 'Comprobad que estáis todos')); x.appendChild(t);
+    x.appendChild(el('span', 'n', c.pres + '/' + c.total));
+    x.onclick = abrirLista; w.appendChild(x);
+  }
+  function abrirLista() { L.abierta = true; $('listaSheet').classList.add('on'); pintarLista(); cargarLista(); clearInterval(L.t); L.t = setInterval(cargarLista, 6000); }
+  function cerrarLista() { L.abierta = false; $('listaSheet').classList.remove('on'); clearInterval(L.t); pintarBotonLista(); }
+  function marcar(ids, valor) {
+    L.datos.alumnos.forEach(function (a) { if (ids.indexOf(a.id) >= 0) { a.presente = valor; a.pend = true; } });
+    L.pend++; pintarLista(); pintarBotonLista(); vibrar(30);
+    api('apiAttendance', S.codigo, ids, valor).then(function (d) {
+      L.pend--; if (!L.pend) { L.datos = d; pintarLista(); pintarBotonLista(); }
+    }).catch(function (e) {
+      L.pend--; toast('No se ha podido guardar: ' + cleanMsg(e)); cargarLista();
+    });
+  }
+  function pintarLista() {
+    var box = $('lst'); box.innerHTML = ''; if (!L.datos) { box.appendChild(el('div', 'spinner')); return; }
+    var d = L.datos, c = cuentaLista();
+    if (d.capitanes.length) box.appendChild(el('div', 'caps', '👑 Capitanía: ' + d.capitanes.join(', ')));
+    var cn = el('div', 'cnt'); cn.appendChild(el('b', '', c.pres + ' de ' + c.total)); cn.appendChild(el('span', '', c.pres === c.total ? '¡estáis todos!' : 'presentes'));
+    var todos = el('button', '', c.pres === c.total ? 'Desmarcar todo' : 'Marcar a todos');
+    todos.onclick = function () { var v = c.pres !== c.total; marcar(d.alumnos.filter(function (a) { return a.presente !== v; }).map(function (a) { return a.id; }), v); };
+    cn.appendChild(todos); box.appendChild(cn);
+    [1, 2].forEach(function (cu) {
+      var grupo = d.alumnos.filter(function (a) { return a.curso === cu; }).sort(function (a, b) { return a.nombre.localeCompare(b.nombre); });
+      if (!grupo.length) return;
+      box.appendChild(el('h3', '', cu + 'º curso · ' + grupo.filter(function (a) { return a.presente; }).length + '/' + grupo.length));
+      grupo.forEach(function (a) {
+        var b = el('button', 'pers' + (a.presente ? ' on' : '') + (a.pend ? ' pend' : ''));
+        b.appendChild(el('span', 'box', a.presente ? '✓' : '')); b.appendChild(el('span', '', a.nombre));
+        b.onclick = function () { marcar([a.id], !a.presente); };
+        box.appendChild(b);
       });
+    });
+  }
+  $('listaBtn').onclick = abrirLista;
+  $('closeLista').onclick = cerrarLista; $('listaListo').onclick = cerrarLista;
+  $('listaSheet').onclick = function (e) { if (e.target === $('listaSheet')) cerrarLista(); };
+
+  // Escaneo: nunca deja la pantalla bloqueada. Cada intento espera como mucho 12 s; si la conexión
+  // va lenta, se puede seguir sin esperar y la app comprueba sola si el QR quedó registrado.
+  function escanear(token) {
+    var idc = idCliente(), mio = ++S.seq, cancelado = false;
+    S.escaneando = true;
+    var c = el('div', 'card registrando');
+    c.appendChild(el('div', 'spinner'));
+    c.appendChild(el('h2', '', 'Registrando el lugar…'));
+    c.appendChild(el('p', 'lento', 'La conexión va un poco lenta. Seguimos intentándolo: no hace falta volver a escanear.'));
+    var b = el('button', 'btn', 'Seguir sin esperar'); c.appendChild(b);
+    render([c]);
+    var tTarde = setTimeout(function () { c.classList.add('tarde'); }, 5000);
+    function fin() { clearTimeout(tTarde); S.escaneando = false; }
+    function comprobar(msg) { fin(); if (msg) toast(msg); S.ver = 0; S.repintar = true; S.forzar = true; poll(); }
+    b.onclick = function () { cancelado = true; comprobar('Lo comprobamos en segundo plano: si el QR quedó registrado, lo veréis en unos segundos.'); };
+    var n = 0;
+    function intento() {
+      return llamarApi('apiScan', [S.codigo, token, idc], n < 2 ? 12000 : 15000).catch(function (e) {
+        if (e.red && n < 2 && !cancelado) { n++; return new Promise(function (ok) { setTimeout(ok, 600 * n); }).then(intento); }
+        throw e;
+      });
+    }
+    return intento().then(function (r) {
+      if (cancelado || mio !== S.seq) { comprobar(); return; }
+      fin(); S.recien = r.repetido === false; mostrar(r); S.recien = false;
+    }).catch(function (e) {
+      if (cancelado) return;
+      var m = cleanMsg(e);
+      fin();
+      if (/ningún equipo/.test(m)) { store(KEY, null); INIT.q = token; pantallaLogin(m); return; }
+      if (/no ha empezado|ha terminado/.test(m)) { S.ultimoTs = -1; S.ver = 0; toast(m); poll(); return; }
+      if (e.red) { comprobar('Conexión lenta: comprobando si el QR se ha registrado…'); return; }
+      pantallaError(m, true);
+    });
   }
 
   function continuar() {
@@ -545,16 +667,19 @@
     if (ok) { S.fallos = 0; $('net').classList.remove('on'); return; }
     S.fallos++; if (S.fallos >= 2) $('net').classList.add('on');
   }
+  // Sondeo ligero: un solo intento de 10 s (el siguiente sondeo ya reintenta). No se mezcla con un escaneo en curso.
   function poll() {
-    if (!S.codigo || document.hidden || S.busy) return;
-    S.busy = true;
-    var enEspera = S.pantalla === 'espera';
-    api('apiState', S.codigo, S.ver, enEspera).then(function (r) {
+    if (!S.codigo || document.hidden || S.escaneando) return;
+    if (S.busy && !S.forzar) return;
+    S.forzar = false; S.busy = true;
+    var enEspera = S.pantalla === 'espera', mio = S.seq;
+    llamarApi('apiState', [S.codigo, S.ver, enEspera], 10000).then(function (r) {
       S.busy = false; red(true);
+      if (mio !== S.seq || S.escaneando) return; // respuesta anterior a un escaneo: se descarta
       if (r.same) { if (enEspera && r.conectados !== undefined) pintarConectados(r.conectados, S.totalEquipos); return; }
-      S.ver = r.ver;
+      S.ver = r.ver; if (!L.abierta) cargarLista();
       var especial = function (p) { return p === 'espera' || p === 'terminada'; };
-      if (r.ultimoTs !== S.ultimoTs || r.pantalla !== S.pantalla && (especial(r.pantalla) || especial(S.pantalla))) mostrar(r);
+      if (S.repintar || r.ultimoTs !== S.ultimoTs || r.pantalla !== S.pantalla && (especial(r.pantalla) || especial(S.pantalla))) mostrar(r);
       else { pintarCabecera(r); if (r.pantalla === 'espera') pintarConectados(r.conectados, r.totalEquipos); }
       procesarMensajes(r.mensajes || []);
     }).catch(function (e) { S.busy = false; if (e && e.red) red(false); });
@@ -721,7 +846,7 @@
       api('apiJoin', desdeTarjeta).then(function (eq) { setEquipo(eq); toast('¡Bienvenidos, ' + eq.nombre + '!'); continuar(); })
         .catch(function (e) { pantallaLogin(cleanMsg(e)); });
     } else if (guardado) {
-      S.codigo = guardado; continuar();
+      S.codigo = guardado; continuar(); cargarLista();
     } else {
       pantallaLogin();
     }

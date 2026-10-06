@@ -147,6 +147,30 @@
   .qrc canvas { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line-2); }
   .qrc b { display: block; font-size: 13.5px; margin: 6px 0 6px; line-height: 1.2; min-height: 32px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  /* formación de equipos con el alumnado */
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .lista-al label { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .lista-al label small { font-weight: 700; color: var(--muted); font-size: 12.5px; }
+  .lista-al textarea { min-height: 190px; font-size: 14px; line-height: 1.45; }
+  .gprev { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 14px; }
+  .gsum { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .gwarn { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 8px 12px; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+  .ggrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .gcard { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: #fff; font-size: 13.5px; }
+  .gcard h4 { margin: 0 0 6px; font-size: 15px; color: var(--navy); display: flex; justify-content: space-between; }
+  .gcard h4 small { color: var(--muted); font-weight: 700; }
+  .gcard .cu { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; color: var(--muted); margin-top: 6px; text-transform: uppercase; }
+  .gcard .cap { color: #9A6B00; font-weight: 700; }
+  .miembros { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 14px; padding: 6px 4px 10px; }
+  .miembro { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+  .miembro .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .miembro .ok { color: var(--ok); font-weight: 800; }
+  .miembro select { width: 130px; padding: 3px 6px; font-size: 12.5px; }
+  .cbadge { display: inline-block; font-size: 11px; font-weight: 800; border-radius: 6px; padding: 1px 6px; background: var(--line-2, #EEF3F9); color: var(--muted); }
+  .cbadge.c3 { background: #FFF3DC; color: #9A6B00; }
+  .lchip { font-size: 12px; font-weight: 800; border-radius: 99px; padding: 1px 8px; margin-left: 6px; background: #EEF3F9; color: var(--muted); white-space: nowrap; }
+  .lchip.ok { background: var(--ok-soft); color: var(--ok); }
+  @media (max-width: 900px) { .grid3 { grid-template-columns: 1fr; } }
   .note { background: var(--info-soft); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; color: var(--navy); }
   /* modal */
   .modal { position: fixed; inset: 0; background: rgba(15,22,38,.45); display: grid; place-items: center; z-index: 20; padding: 20px; }
@@ -193,6 +217,13 @@
   .al .x { background: none; border: 0; font-size: 18px; color: var(--muted); cursor: pointer; line-height: 1; }
   @keyframes alIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
   .bell { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); color: #fff; }
+  /* acciones en curso */
+  body.cargando::before { content: ''; position: fixed; top: 0; left: 0; height: 3px; width: 40%; z-index: 100; background: linear-gradient(90deg, transparent, #F5B800, transparent); animation: carga 1s linear infinite; }
+  body.cargando { cursor: progress; }
+  @keyframes carga { from { left: -40%; } to { left: 100%; } }
+  button.esperando { position: relative; color: transparent !important; pointer-events: none; }
+  button.esperando::after { content: ''; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; border: 2.5px solid rgba(127,127,127,.35); border-top-color: currentColor; border-top-color: #1E88E5; animation: girar .8s linear infinite; }
+  @keyframes girar { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -292,6 +323,30 @@
 
   <!-- EQUIPOS -->
   <section class="wrap tab hidden" id="tab-equipos">
+    <div class="card" style="margin-bottom:16px">
+      <h2>Formar equipos con el alumnado</h2>
+      <p class="sub">Pega los nombres, uno por línea (puedes copiarlos de una columna de Excel). Cada equipo tendrá, en lo posible, la mitad de alumnado de 1º y la mitad de 2º. Los capitanes y capitanas de 3º se reparten entre los equipos: si hay más que equipos, algunos tendrán 2 o 3.</p>
+      <div class="grid3">
+        <div class="lista-al"><label for="g1">1º curso <small id="g1n">0</small></label><textarea class="f" id="g1" placeholder="Un nombre por línea"></textarea></div>
+        <div class="lista-al"><label for="g2">2º curso <small id="g2n">0</small></label><textarea class="f" id="g2" placeholder="Un nombre por línea"></textarea></div>
+        <div class="lista-al"><label for="g3">3º curso · capitanía (opcional) <small id="g3n">0</small></label><textarea class="f" id="g3" placeholder="Un nombre por línea"></textarea></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <label class="small muted" for="gN">Número de equipos</label>
+        <input class="f" id="gN" type="number" min="1" max="60" value="" style="width:90px">
+        <span class="small muted grow" id="gHint">Pega las listas para ver una propuesta.</span>
+        <button class="btn primary" id="gMix">🔀 Mezclar y ver propuesta</button>
+      </div>
+      <div class="gprev hidden" id="gPrev">
+        <div class="gsum" id="gSum"></div>
+        <div id="gWarn"></div>
+        <div class="ggrid" id="gGrid"></div>
+        <div class="row" style="margin-top:12px; justify-content:flex-end">
+          <button class="btn" id="gAgain">🔀 Volver a mezclar</button>
+          <button class="btn gold" id="gCreate">✓ Crear estos equipos</button>
+        </div>
+      </div>
+    </div>
     <div class="grid2">
       <div class="card">
         <h2>Crear equipos</h2>
@@ -308,7 +363,8 @@
     </div>
     <div class="card" style="margin-top:16px">
       <div class="row" style="margin-bottom:8px"><h2 class="grow">Equipos</h2><button class="btn danger" id="delAllTeams">Borrar todos los equipos</button><button class="btn primary" id="saveTeams">Guardar cambios</button></div>
-      <table><thead><tr><th style="width:60px">Color</th><th>Nombre</th><th style="width:130px">Código</th><th>Punto de salida</th><th style="width:60px"></th></tr></thead><tbody id="teamEdit"></tbody></table>
+      <table><thead><tr><th style="width:60px">Color</th><th>Nombre</th><th style="width:110px">Código</th><th>Alumnado</th><th>Punto de salida</th><th style="width:60px"></th></tr></thead><tbody id="teamEdit"></tbody></table>
+      <div id="sinEquipo"></div>
     </div>
   </section>
 
@@ -447,7 +503,16 @@ function api(fn) {
   }
   return intento();
 }
-function adm(fn) { var a = Array.prototype.slice.call(arguments, 1); return api.apply(null, [fn, A.pin].concat(a)); }
+// Acciones del panel: respuesta visual inmediata (barra superior y botón en espera) mientras llega la respuesta
+function adm(fn) {
+  var a = Array.prototype.slice.call(arguments, 1), boton = document.activeElement;
+  if (!boton || boton.tagName !== 'BUTTON' || boton.closest('#nav')) boton = null;
+  A.enCurso = (A.enCurso || 0) + 1; document.body.classList.add('cargando');
+  if (boton) { boton.classList.add('esperando'); boton.disabled = true; }
+  var lento = setTimeout(function () { toast('Guardando… la conexión con Google va algo lenta'); }, 4000);
+  function fin() { clearTimeout(lento); A.enCurso--; if (!A.enCurso) document.body.classList.remove('cargando'); if (boton) { boton.classList.remove('esperando'); boton.disabled = false; } }
+  return api.apply(null, [fn, A.pin].concat(a)).then(function (r) { fin(); return r; }, function (e) { fin(); throw e; });
+}
 function toast(t) { var x = $('toast'); x.textContent = t; x.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function () { x.classList.remove('on'); }, 3000); }
 function clean(e) { return String(e && e.message || e).replace(/^(Exception|Error):\s*/, ''); }
 function now() { return Date.now() + A.skew; }
@@ -461,7 +526,7 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.06-b') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.06-d') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -474,7 +539,7 @@ function login(pin) {
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-b, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-d, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -503,7 +568,8 @@ Array.prototype.forEach.call(document.querySelectorAll('#nav button'), function 
 function refresh(force) {
   if (A.busy && !force) return Promise.resolve();
   A.busy = true;
-  return adm('adminDashboard', force ? 0 : A.ver).then(function (d) {
+  // El seguimiento se consulta con un solo intento corto: si falla, el siguiente ciclo vuelve a probar
+  return llamarApi('adminDashboard', [A.pin, force ? 0 : A.ver], 15000).then(function (d) {
     A.busy = false;
     $('live').classList.remove('off', 'warn'); $('liveTxt').textContent = 'En directo'; $('live').title = ''; A.ultimoError = null; A.fallos = 0;
     A.skew = d.ahora - Date.now();
@@ -553,7 +619,7 @@ function pintarEspera() {
   var n = d.equipos.filter(conectado).length;
   $('waitTitle').textContent = 'Sala de espera · ' + n + ' de ' + d.equipos.length + ' equipos conectados';
   var ch = $('waitChips'); ch.innerHTML = '';
-  d.equipos.forEach(function (t) { ch.appendChild(el('span', conectado(t) ? 'live' : '', t.nombre)); });
+  d.equipos.forEach(function (t) { ch.appendChild(el('span', conectado(t) ? 'live' : '', t.nombre + (t.lista && t.lista.total ? ' · 📋 ' + t.lista.presentes + '/' + t.lista.total : ''))); });
 }
 $('proyBtn').onclick = function () {
   try { localStorage.setItem('pdv_proy_pin', JSON.stringify({ pin: A.pin, ts: Date.now() })); } catch (e) {}
@@ -614,7 +680,7 @@ function pintarSeguimiento() {
     k.msg += t.sinLeer;
     if (!filtro.ok(x) || q && (t.nombre + ' ' + t.codigo).toLowerCase().indexOf(q) < 0) return;
     var tr = el('tr'); if (A.destacar && A.destacar[t.codigo] && now() - A.destacar[t.codigo] < 4000) tr.className = 'flash';
-    var c1 = el('td'); var n = el('div', 'tname'); var dt = el('span', 'dot'); dt.style.background = t.color; n.appendChild(dt); n.appendChild(el('span', '', t.nombre)); n.appendChild(el('span', 'code', t.codigo)); var od = el('span', 'on-dot' + (conectado(t) ? ' live' : '')); od.title = conectado(t) ? 'Conectado ahora' : 'Sin conexión reciente'; n.appendChild(od); c1.appendChild(n);
+    var c1 = el('td'); var n = el('div', 'tname'); var dt = el('span', 'dot'); dt.style.background = t.color; n.appendChild(dt); n.appendChild(el('span', '', t.nombre)); n.appendChild(el('span', 'code', t.codigo)); if (t.lista && t.lista.total) n.appendChild(el('span', 'lchip' + (t.lista.presentes === t.lista.total ? ' ok' : ''), '📋 ' + t.lista.presentes + '/' + t.lista.total)); var od = el('span', 'on-dot' + (conectado(t) ? ' live' : '')); od.title = conectado(t) ? 'Conectado ahora' : 'Sin conexión reciente'; n.appendChild(od); c1.appendChild(n);
     var c2 = el('td'); var pb = el('span', 'pbar'); var fill = el('i'); fill.style.width = Math.round(100 * t.hechos / t.total) + '%'; fill.style.background = t.color; pb.appendChild(fill); c2.appendChild(pb); c2.appendChild(el('span', 'pnum', t.hechos + '/' + t.total));
     var c3 = el('td');
     if (t.ultimo) { c3.appendChild(el('div', '', nombrePunto(t.ultimo.orden))); c3.appendChild(el('div', 'small muted', hace(t.ultimo.ts) + ' · ' + hora(t.ultimo.ts))); }
@@ -814,13 +880,16 @@ Array.prototype.forEach.call(document.querySelectorAll('#thQuick button'), funct
 
 // ───── Equipos ─────
 function cargarEquipos() {
-  return adm('adminGetTeams').then(function (ts) { A.teams = ts; pintarEquipos(); return ts; });
+  return Promise.all([adm('adminGetTeams'), adm('adminGetStudents')]).then(function (r) {
+    A.teams = r[0]; A.alumnos = r[1]; rellenarListas(); pintarEquipos(); return r[0];
+  });
 }
 function puntosLista() { return A.puntos ? Promise.resolve(A.puntos) : adm('adminGetPoints').then(function (p) { A.puntos = p; return p; }); }
 function pintarEquipos() {
   puntosLista().then(function (ps) {
     var tb = $('teamEdit'); tb.innerHTML = '';
-    if (!A.teams.length) { var tr0 = el('tr'); var td0 = el('td', 'muted', 'No hay equipos todavía.'); td0.colSpan = 5; tr0.appendChild(td0); tb.appendChild(tr0); }
+    if (!A.teams.length) { var tr0 = el('tr'); var td0 = el('td', 'muted', 'No hay equipos todavía.'); td0.colSpan = 6; tr0.appendChild(td0); tb.appendChild(tr0); }
+    A.abiertos = A.abiertos || {};
     A.teams.forEach(function (t) {
       var tr = el('tr');
       var c = el('input'); c.type = 'color'; c.value = t.color; c.style.width = '40px'; c.style.height = '30px'; c.style.border = 'none'; c.style.background = 'none'; c.oninput = function () { t.color = c.value; };
@@ -831,11 +900,128 @@ function pintarEquipos() {
       del.onclick = function () { confirmar('Borrar «' + t.nombre + '»', 'Se borrará el equipo junto con sus escaneos y mensajes. Su tarjeta dejará de funcionar.', 'Borrar', function () {
         adm('adminDeleteTeam', t.codigo).then(function () { toast('Equipo borrado'); cargarEquipos(); refresh(true); }).catch(function (e) { toast(clean(e)); }); }, true); };
       var cod = el('span', 'code', t.codigo);
-      [c, n, cod, s, del].forEach(function (x) { var td = el('td'); td.appendChild(x); tr.appendChild(td); });
+      var mios = (A.alumnos || []).filter(function (a) { return a.equipo === t.codigo; });
+      var resumen = el('div', 'small');
+      if (mios.length) {
+        var n1 = mios.filter(function (a) { return a.curso === 1; }).length, n2 = mios.filter(function (a) { return a.curso === 2; }).length;
+        var caps = mios.filter(function (a) { return a.curso === 3; }), pres = mios.filter(function (a) { return a.curso !== 3 && a.presente; }).length;
+        resumen.appendChild(document.createTextNode(n1 + ' de 1º · ' + n2 + ' de 2º'));
+        resumen.appendChild(el('span', 'lchip' + (pres && pres === n1 + n2 ? ' ok' : ''), '📋 ' + pres + '/' + (n1 + n2)));
+        resumen.appendChild(el('div', 'muted', caps.length ? '👑 ' + caps.map(function (a) { return a.nombre; }).join(', ') : 'Sin capitanía'));
+        var ver = el('button', 'btn sm', A.abiertos[t.codigo] ? 'Ocultar' : '👥 Ver y mover'); ver.style.marginTop = '4px';
+        ver.onclick = function () { A.abiertos[t.codigo] = !A.abiertos[t.codigo]; pintarEquipos(); };
+        resumen.appendChild(ver);
+      } else resumen.appendChild(el('span', 'muted', '—'));
+      [c, n, cod, resumen, s, del].forEach(function (x) { var td = el('td'); td.appendChild(x); tr.appendChild(td); });
       tb.appendChild(tr);
+      if (A.abiertos[t.codigo] && mios.length) {
+        var sub = el('tr'), td = el('td'); td.colSpan = 6; td.style.background = '#F7FAFE';
+        td.appendChild(listaMiembros(mios)); sub.appendChild(td); tb.appendChild(sub);
+      }
     });
+    var sin = (A.alumnos || []).filter(function (a) { return !a.equipo; }), box = $('sinEquipo'); box.innerHTML = '';
+    if (sin.length && A.teams.length) { box.appendChild(el('h3', '', 'Sin equipo (' + sin.length + ')')); box.appendChild(listaMiembros(sin)); }
   });
 }
+function listaMiembros(lista) {
+  var g = el('div', 'miembros');
+  lista.slice().sort(function (a, b) { return a.curso - b.curso || a.nombre.localeCompare(b.nombre); }).forEach(function (a) {
+    var m = el('div', 'miembro');
+    m.appendChild(el('span', 'cbadge' + (a.curso === 3 ? ' c3' : ''), a.curso === 3 ? '👑 3º' : a.curso + 'º'));
+    m.appendChild(el('span', 'nm', a.nombre));
+    if (a.presente) m.appendChild(el('span', 'ok', '✓'));
+    var sel = el('select', 'f'); var o0 = el('option', '', 'Sin equipo'); o0.value = ''; sel.appendChild(o0);
+    A.teams.forEach(function (t) { var o = el('option', '', t.nombre); o.value = t.codigo; if (t.codigo === a.equipo) o.selected = true; sel.appendChild(o); });
+    sel.title = 'Mover a otro equipo';
+    sel.onchange = function () {
+      adm('adminMoveStudent', a.id, sel.value).then(function (nuevo) { a.equipo = nuevo.equipo; a.presente = false; toast(a.nombre + ' → ' + (sel.options[sel.selectedIndex].text)); if (sel.value) A.abiertos[sel.value] = true; pintarEquipos(); refresh(true); })
+        .catch(function (e) { toast(clean(e)); pintarEquipos(); });
+    };
+    m.appendChild(sel); g.appendChild(m);
+  });
+  return g;
+}
+
+// ───── Formar equipos con el alumnado ─────
+function nombresDe(id) {
+  return $(id).value.split(/\r?\n/).map(function (x) { return x.replace(/\t+/g, ' ').replace(/\s+/g, ' ').replace(/^\d+[.)-]\s+/, '').trim(); })
+    .filter(function (x) { return !!x; });
+}
+function repetidos() {
+  var cuenta = {}, rep = [];
+  ['g1', 'g2', 'g3'].forEach(function (id) { nombresDe(id).forEach(function (x) { var k = x.toLowerCase(); cuenta[k] = (cuenta[k] || 0) + 1; if (cuenta[k] === 2) rep.push(x); }); });
+  return rep;
+}
+function sugerido(T) { if (!T) return 0; var n = Math.round(T / 5); n = Math.max(n, Math.ceil(T / 6)); n = Math.min(n, Math.max(1, Math.floor(T / 4))); return Math.max(1, n); }
+function contarListas() {
+  var a = nombresDe('g1').length, b = nombresDe('g2').length, c = nombresDe('g3').length, T = a + b;
+  $('g1n').textContent = a + (a === 1 ? ' persona' : ' personas'); $('g2n').textContent = b + (b === 1 ? ' persona' : ' personas'); $('g3n').textContent = c + (c === 1 ? ' persona' : ' personas');
+  var sug = sugerido(T);
+  if (!A.gNManual) $('gN').value = sug || '';
+  $('gHint').textContent = T ? 'Sugerido: ' + sug + ' equipos de unas ' + Math.round(T / Math.max(1, sug)) + ' personas (más la capitanía).' : 'Pega las listas para ver una propuesta.';
+}
+function rellenarListas() {
+  if (!A.alumnos || !A.alumnos.length || $('g1').value || $('g2').value || $('g3').value) { contarListas(); return; }
+  [1, 2, 3].forEach(function (cu) { $('g' + cu).value = A.alumnos.filter(function (a) { return a.curso === cu; }).map(function (a) { return a.nombre; }).join('\n'); });
+  contarListas();
+}
+['g1', 'g2', 'g3'].forEach(function (id) { $(id).oninput = function () { contarListas(); $('gPrev').classList.add('hidden'); }; });
+$('gN').oninput = function () { A.gNManual = !!$('gN').value; $('gPrev').classList.add('hidden'); };
+function barajar(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = a[i]; a[i] = a[j]; a[j] = x; } return a; }
+function repartir() {
+  var n = Math.max(1, Math.min(60, Number($('gN').value) || 0));
+  var l1 = barajar(nombresDe('g1')), l2 = barajar(nombresDe('g2')), l3 = barajar(nombresDe('g3'));
+  var eq = []; for (var i = 0; i < n; i++) eq.push({ p: [], s: [], c: [] });
+  l1.forEach(function (x, i) { eq[i % n].p.push(x); });
+  l2.forEach(function (x, j) { eq[(l1.length + j) % n].s.push(x); }); // continúa donde acabó 1º: tamaños equilibrados
+  var orden = eq.map(function (e, i) { return i; }).sort(function (a, b) { return (eq[b].p.length + eq[b].s.length) - (eq[a].p.length + eq[a].s.length) || a - b; });
+  l3.forEach(function (x, k) { eq[orden[k % n]].c.push(x); });
+  return { n: n, eq: eq, n1: l1.length, n2: l2.length, n3: l3.length };
+}
+function pintarPropuesta() {
+  var G = A.propuesta, tam = G.eq.map(function (e) { return e.p.length + e.s.length; });
+  var sum = $('gSum'); sum.innerHTML = '';
+  [G.n + ' equipos', Math.min.apply(null, tam) + (Math.min.apply(null, tam) === Math.max.apply(null, tam) ? '' : '–' + Math.max.apply(null, tam)) + ' personas por equipo', G.n1 + ' de 1º · ' + G.n2 + ' de 2º', G.n3 + ' de 3º en capitanía'].forEach(function (t) { sum.appendChild(el('span', 'chip run', t)); });
+  var w = $('gWarn'); w.innerHTML = '';
+  var avisos = [];
+  if (Math.abs(G.n1 - G.n2) > 1) avisos.push('Hay ' + Math.abs(G.n1 - G.n2) + ' personas más en ' + (G.n1 > G.n2 ? '1º' : '2º') + ': en algunos equipos no será exactamente mitad y mitad.');
+  if (Math.max.apply(null, tam) > 6) avisos.push('Algunos equipos superan las 6 personas: puedes aumentar el número de equipos.');
+  if (Math.min.apply(null, tam) < 4 && G.n1 + G.n2 >= 4) avisos.push('Algunos equipos tienen menos de 4 personas: puedes reducir el número de equipos.');
+  if (G.n3 && G.n3 < G.n) avisos.push((G.n - G.n3) + ' equipos se quedarán sin capitán o capitana.');
+  var rep = repetidos();
+  if (rep.length) avisos.push('Nombres repetidos (revisa si son la misma persona): ' + rep.slice(0, 6).join(', ') + (rep.length > 6 ? '…' : '') + '.');
+  if (!G.n3) avisos.push('No has incluido alumnado de 3º: los equipos no tendrán capitanía (puedes asignarla después).');
+  avisos.forEach(function (t) { w.appendChild(el('div', 'gwarn', '⚠ ' + t)); });
+  var g = $('gGrid'); g.innerHTML = '';
+  G.eq.forEach(function (e, i) {
+    var c = el('div', 'gcard'), h = el('h4'); h.appendChild(el('span', '', 'Equipo ' + (i + 1))); h.appendChild(el('small', '', (e.p.length + e.s.length) + ' pers.')); c.appendChild(h);
+    c.appendChild(el('div', 'cap', e.c.length ? '👑 ' + e.c.join(', ') : '👑 —'));
+    c.appendChild(el('div', 'cu', '1º curso (' + e.p.length + ')')); c.appendChild(el('div', '', e.p.join(', ') || '—'));
+    c.appendChild(el('div', 'cu', '2º curso (' + e.s.length + ')')); c.appendChild(el('div', '', e.s.join(', ') || '—'));
+    g.appendChild(c);
+  });
+  $('gPrev').classList.remove('hidden');
+}
+$('gMix').onclick = $('gAgain').onclick = function () {
+  if (!nombresDe('g1').length && !nombresDe('g2').length) { toast('Pega primero las listas de 1º y 2º'); return; }
+  if (!Number($('gN').value)) { toast('Indica el número de equipos'); return; }
+  A.propuesta = repartir(); pintarPropuesta();
+};
+$('gCreate').onclick = function () {
+  var G = A.propuesta; if (!G) return;
+  var lista = [];
+  G.eq.forEach(function (e, i) {
+    e.p.forEach(function (x) { lista.push({ nombre: x, curso: 1, grupo: i }); });
+    e.s.forEach(function (x) { lista.push({ nombre: x, curso: 2, grupo: i }); });
+    e.c.forEach(function (x) { lista.push({ nombre: x, curso: 3, grupo: i }); });
+  });
+  var texto = (A.teams && A.teams.length ? 'Se sustituirán los ' + A.teams.length + ' equipos actuales y sus códigos: las tarjetas que ya hayas impreso dejarán de servir. ' : '') + 'Se crearán ' + G.n + ' equipos con ' + lista.length + ' personas. ¿Continuar?';
+  confirmar('Crear ' + G.n + ' equipos', texto, 'Crear equipos', function () {
+    adm('adminCreateGroups', G.n, lista).then(function () {
+      toast(G.n + ' equipos creados con su alumnado'); $('gPrev').classList.add('hidden'); A.propuesta = null; cargarEquipos(); refresh(true);
+    }).catch(function (e) { toast(clean(e)); });
+  });
+};
 $('createTeams').onclick = function () {
   var n = Number($('nTeams').value);
   confirmar('Generar ' + n + ' equipos', 'Se sustituirán los equipos actuales y sus códigos. ¿Continuar?', 'Generar', function () {
@@ -989,6 +1175,7 @@ function tarjeta(t) {
   c.fillStyle = '#fff'; c.textAlign = 'left'; c.font = '800 30px Poppins'; c.fillText('PIEZAS DE UNA', 240, 70); c.font = '900 56px Poppins'; c.fillText('VOCACIÓN', 236, 124);
   c.fillStyle = '#fff'; c.beginPath(); c.arc(W - 74, 80, 36, 0, Math.PI * 2); c.fill(); c.fillStyle = t.color; c.beginPath(); c.arc(W - 74, 80, 27, 0, Math.PI * 2); c.fill();
   c.fillStyle = NAVY; c.font = '800 62px Poppins'; c.fillText(t.nombre, 60, 250);
+  if (t.capitanes && t.capitanes.length) { c.fillStyle = '#9A6B00'; c.font = '700 22px "Nunito Sans"'; wrap(c, 'Capitanía: ' + t.capitanes.join(' · '), 60, 290, 720, 26, 1); c.translate(0, 30); }
   c.fillStyle = '#5A6B85'; c.font = '700 24px "Nunito Sans"'; c.fillText('CÓDIGO DEL EQUIPO', 60, 300);
   c.fillStyle = t.color; c.font = '800 72px Poppins'; c.fillText(t.codigo.split('').join(' '), 60, 380);
   c.fillStyle = NAVY; c.font = '700 28px Poppins'; c.fillText('Vuestra primera pista', 60, 450);
@@ -1001,6 +1188,7 @@ function tarjeta(t) {
   c.textAlign = 'center'; c.fillStyle = NAVY; c.font = '700 23px "Nunito Sans"';
   wrap(c, 'Escanead este código para entrar en la app con vuestro equipo', qx + qs / 2, qy + qs + 56, qs + 30, 29, 2);
   c.fillStyle = '#5A6B85'; c.font = '400 21px "Nunito Sans"'; c.fillText('Salida: ' + t.nombreSalida, qx + qs / 2, Hh - 50);
+  c.setTransform(1, 0, 0, 1, 0, 0);
   return cv;
 }
 
@@ -1138,7 +1326,7 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.06-b · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.06-d · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
 }
