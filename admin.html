@@ -175,6 +175,24 @@
     .plist .pt > *:nth-child(n+3) { grid-column: 2; }
     .hide-m { display: none; }
   }
+  /* alertas y filtros */
+  .segbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .segbar input { flex: 1 1 180px; min-width: 150px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 14px; }
+  .fchip { border: 1px solid var(--line); background: #fff; color: var(--navy); border-radius: 99px; padding: 5px 11px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .fchip.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .fchip b { margin-left: 4px; opacity: .75; }
+  tr.flash td { animation: rowflash 1.2s ease 3; }
+  @keyframes rowflash { 50% { background: #FDE7E7; } }
+  .alertas { position: fixed; right: 16px; bottom: 16px; z-index: 60; display: flex; flex-direction: column; gap: 10px; width: 340px; max-width: calc(100vw - 32px); }
+  .al { display: flex; gap: 10px; align-items: flex-start; background: #fff; border-left: 6px solid var(--err); border-radius: 12px; padding: 12px 12px 12px 14px; box-shadow: 0 14px 34px -12px rgba(11,30,60,.45); animation: alIn .35s cubic-bezier(.3,1.4,.5,1); }
+  .al.warn { border-left-color: #E09A00; }
+  .al .ic { font-size: 22px; line-height: 1; }
+  .al .tx { flex: 1; font-size: 14px; }
+  .al .tx b { display: block; font-size: 15px; }
+  .al .ac { display: flex; gap: 6px; margin-top: 8px; }
+  .al .x { background: none; border: 0; font-size: 18px; color: var(--muted); cursor: pointer; line-height: 1; }
+  @keyframes alIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .bell { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); color: #fff; }
 </style>
 </head>
 <body>
@@ -199,6 +217,8 @@
     <div class="brand">PIEZAS DE UNA VOCACIÓN<small>Gymkana de orientación · Panel de coordinación</small></div>
     <span class="live" id="live"><i></i><span id="liveTxt">En directo</span></span>
     <div class="clock"><b id="clock">--:--</b><small id="clockLbl">Sin iniciar</small></div>
+    <button class="btn bell" id="proyBtn" title="Abrir la clasificación para proyectar">📺 Clasificación</button>
+    <button class="btn bell" id="bellBtn" title="Sonido de alertas">🔔</button>
     <button class="btn alert" id="bcTop">📣 Aviso a todos</button>
     <button class="btn gold" id="startBtn">▶ Iniciar actividad</button>
     <button class="btn end hidden" id="endBtn">⏹ Terminar actividad</button>
@@ -228,6 +248,7 @@
       <div class="kpi msg"><span class="eyebrow">Mensajes sin leer</span><b id="kMsg">0</b></div>
     </div>
     <div class="card" style="padding:0;overflow:hidden">
+      <div class="segbar"><input id="segBusca" type="search" placeholder="🔍 Buscar equipo o código…" autocomplete="off"><div id="segFiltros" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>
       <div style="overflow-x:auto">
         <table>
           <thead><tr><th>Equipo</th><th>Progreso</th><th>Último punto</th><th class="hide-m">Siguiente esperado</th><th>Estado</th><th></th></tr></thead>
@@ -374,6 +395,11 @@
           <button class="btn" id="reopenBtn">↺ Reabrir actividad</button>
         </div>
         <div class="card" style="margin-top:16px">
+          <h2>PIN de los monitores</h2>
+          <p class="sub">Los monitores de cada prueba entran en <b>monitor.html</b> con este PIN. Solo pueden ver el seguimiento, sin acceso al panel.</p>
+          <div class="row"><input class="f" id="monPin" type="text" placeholder="Nuevo PIN (mín. 4)" style="width:200px"><button class="btn primary" id="monPinBtn">Cambiar PIN de monitores</button></div>
+        </div>
+        <div class="card" style="margin-top:16px">
           <h2>PIN de administración</h2>
           <p class="sub" id="verInfo" style="margin:0 0 6px"></p>
           <p class="sub" style="margin:0">Para cambiarlo, abre el editor de Apps Script, escribe el nuevo PIN en <code>NUEVO_PIN</code> y ejecuta la función <code>cambiarPin</code>.</p>
@@ -435,7 +461,7 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.05-g') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.06-b') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -448,7 +474,7 @@ function login(pin) {
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.05-g, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-b, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -529,6 +555,10 @@ function pintarEspera() {
   var ch = $('waitChips'); ch.innerHTML = '';
   d.equipos.forEach(function (t) { ch.appendChild(el('span', conectado(t) ? 'live' : '', t.nombre)); });
 }
+$('proyBtn').onclick = function () {
+  try { localStorage.setItem('pdv_proy_pin', JSON.stringify({ pin: A.pin, ts: Date.now() })); } catch (e) {}
+  window.open('clasificacion.html', '_blank');
+};
 $('startBtn2').onclick = function () { $('startBtn').onclick(); };
 $('bcTop').onclick = function () {
   var box = $('modalBox'); box.innerHTML = '';
@@ -573,11 +603,17 @@ function pintarSeguimiento() {
   $('noTeams').classList.toggle('hidden', d.equipos.length > 0);
   var lista = d.equipos.map(function (t) { return { t: t, e: estadoEquipo(t, cfg) }; });
   lista.sort(function (a, b) { return a.e.rank - b.e.rank || (b.t.hechos - a.t.hechos); });
+  vigilarAlertas(lista);
+  var cuenta = { todos: 0, atencion: 0, ayuda: 0, marcha: 0, fin: 0, off: 0 };
+  lista.forEach(function (x) { FILTROS.forEach(function (f) { if (f.ok(x)) cuenta[f.id]++; }); });
+  pintarFiltros(cuenta);
+  var q = (A.busca || '').toLowerCase().trim(), filtro = FILTROS.filter(function (f) { return f.id === (A.filtro || 'todos'); })[0];
   lista.forEach(function (x) {
     var t = x.t, e = x.e;
     if (e.k === 'fin') k.done++; else if (e.k === 'err' || e.k === 'warn') k.alert++; else if (e.k === 'idle') k.idle++; else k.run++;
     k.msg += t.sinLeer;
-    var tr = el('tr');
+    if (!filtro.ok(x) || q && (t.nombre + ' ' + t.codigo).toLowerCase().indexOf(q) < 0) return;
+    var tr = el('tr'); if (A.destacar && A.destacar[t.codigo] && now() - A.destacar[t.codigo] < 4000) tr.className = 'flash';
     var c1 = el('td'); var n = el('div', 'tname'); var dt = el('span', 'dot'); dt.style.background = t.color; n.appendChild(dt); n.appendChild(el('span', '', t.nombre)); n.appendChild(el('span', 'code', t.codigo)); var od = el('span', 'on-dot' + (conectado(t) ? ' live' : '')); od.title = conectado(t) ? 'Conectado ahora' : 'Sin conexión reciente'; n.appendChild(od); c1.appendChild(n);
     var c2 = el('td'); var pb = el('span', 'pbar'); var fill = el('i'); fill.style.width = Math.round(100 * t.hechos / t.total) + '%'; fill.style.background = t.color; pb.appendChild(fill); c2.appendChild(pb); c2.appendChild(el('span', 'pnum', t.hechos + '/' + t.total));
     var c3 = el('td');
@@ -594,10 +630,76 @@ function pintarSeguimiento() {
     [c1, c2, c3, c4, c5, c6].forEach(function (c) { tr.appendChild(c); });
     rows.appendChild(tr);
   });
+  if (!rows.children.length && d.equipos.length) { var vr = el('tr'), vc = el('td', 'muted', 'Ningún equipo coincide con el filtro.'); vc.colSpan = 6; vc.style.textAlign = 'center'; vc.style.padding = '18px'; vr.appendChild(vc); rows.appendChild(vr); }
+  document.title = (k.alert + k.msg ? '(' + (k.alert + k.msg) + ') ⚠ ' : '') + 'Panel · Piezas de una vocación';
   $('kRun').textContent = k.run; $('kIdle').textContent = k.idle; $('kAlert').textContent = k.alert; $('kDone').textContent = k.done; $('kMsg').textContent = k.msg;
   $('navUnread').textContent = k.msg; $('navUnread').classList.toggle('hidden', !k.msg);
   pintarEspera();
   pintarMatriz();
+}
+
+// ───── Filtros, búsqueda y alertas ─────
+var FILTROS = [
+  { id: 'todos', txt: 'Todos', ok: function () { return true; } },
+  { id: 'atencion', txt: '⚠ Atención', ok: function (x) { return x.e.k === 'err' || x.e.k === 'warn'; } },
+  { id: 'ayuda', txt: '💬 Piden ayuda', ok: function (x) { return x.t.sinLeer > 0; } },
+  { id: 'marcha', txt: 'En marcha', ok: function (x) { return x.e.k === 'run' || x.e.k === 'ok'; } },
+  { id: 'fin', txt: '🏆 Finalizados', ok: function (x) { return x.e.k === 'fin'; } },
+  { id: 'off', txt: '📵 Sin conexión', ok: function (x) { return !conectado(x.t) && x.e.k !== 'fin'; } }
+];
+function pintarFiltros(c) {
+  var box = $('segFiltros'); box.innerHTML = '';
+  FILTROS.forEach(function (f) {
+    var b = el('button', 'fchip' + ((A.filtro || 'todos') === f.id ? ' on' : ''), f.txt); b.appendChild(el('b', '', String(c[f.id])));
+    b.onclick = function () { A.filtro = f.id; pintarSeguimiento(); }; box.appendChild(b);
+  });
+}
+$('segBusca').oninput = function () { A.busca = this.value; pintarSeguimiento(); };
+var AL = { sonido: true, previo: null, audio: null };
+try { AL.sonido = localStorage.getItem('pdv_adm_sonido') !== '0'; } catch (e) {}
+function pintarCampana() { $('bellBtn').textContent = AL.sonido ? '🔔' : '🔕'; }
+pintarCampana();
+$('bellBtn').onclick = function () {
+  AL.sonido = !AL.sonido; try { localStorage.setItem('pdv_adm_sonido', AL.sonido ? '1' : '0'); } catch (e) {}
+  pintarCampana(); if (AL.sonido) { tono('ayuda'); toast('Sonido de alertas activado'); } else toast('Sonido de alertas desactivado');
+  try { if (AL.sonido && window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
+};
+function tono(tipo) {
+  if (!AL.sonido) return;
+  try {
+    var C = window.AudioContext || window.webkitAudioContext; if (!C) return; AL.audio = AL.audio || new C(); if (AL.audio.state === 'suspended') AL.audio.resume();
+    var ac = AL.audio, t = ac.currentTime + 0.02, fs = tipo === 'ayuda' ? [880, 1174.7, 880, 1174.7] : [587.3, 440];
+    fs.forEach(function (f, i) { var o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + i * 0.16); g.gain.exponentialRampToValueAtTime(0.25, t + i * 0.16 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.16 + 0.15); o.connect(g); g.connect(ac.destination); o.start(t + i * 0.16); o.stop(t + i * 0.16 + 0.2); });
+  } catch (e) {}
+}
+function avisoFlotante(t, tipo, texto) {
+  var box = $('alertas'); if (!box) { box = el('div', 'alertas'); box.id = 'alertas'; document.body.appendChild(box); }
+  var id = 'al_' + t.codigo + '_' + tipo, viejo = document.getElementById(id); if (viejo) viejo.remove();
+  var a = el('div', 'al' + (tipo === 'parado' ? ' warn' : '')); a.id = id;
+  a.appendChild(el('div', 'ic', tipo === 'ayuda' ? '💬' : '⏱'));
+  var tx = el('div', 'tx'); tx.appendChild(el('b', '', t.nombre)); tx.appendChild(document.createTextNode(texto));
+  var ac = el('div', 'ac');
+  var b1 = el('button', 'btn sm', tipo === 'ayuda' ? 'Abrir chat' : 'Ver equipo');
+  b1.onclick = function () { a.remove(); if (tipo === 'ayuda') abrirChat(t.codigo); else { var nb = document.querySelector('#nav [data-tab="seg"]'); nb && nb.click(); A.filtro = 'todos'; A.busca = t.codigo; $('segBusca').value = t.codigo; pintarSeguimiento(); } };
+  ac.appendChild(b1); tx.appendChild(ac); a.appendChild(tx);
+  var x = el('button', 'x', '×'); x.onclick = function () { a.remove(); }; a.appendChild(x);
+  box.insertBefore(a, box.firstChild);
+  while (box.children.length > 4) box.lastChild.remove();
+  setTimeout(function () { a.remove(); }, 45000);
+  try { if (document.hidden && window.Notification && Notification.permission === 'granted') new Notification(t.nombre + (tipo === 'ayuda' ? ' pide ayuda' : ' está parado'), { body: texto }); } catch (e) {}
+}
+function vigilarAlertas(lista) {
+  var ahora = {}, primera = AL.previo === null; AL.previo = AL.previo || {};
+  A.destacar = A.destacar || {};
+  lista.forEach(function (x) {
+    var t = x.t, c = t.codigo, p = AL.previo[c] || { leer: 0, parado: false };
+    var parado = (x.e.k === 'err' || x.e.k === 'warn') && !t.sinLeer;
+    ahora[c] = { leer: t.sinLeer, parado: parado };
+    if (primera) return;
+    if (t.sinLeer > p.leer) { var ult = (A.data.mensajes || []).filter(function (m) { return m.equipo === c && m.de === 'equipo'; }).pop(); avisoFlotante(t, 'ayuda', ult ? '«' + ult.texto + '»' : 'Ha escrito en el chat.'); tono('ayuda'); A.destacar[c] = now(); }
+    else if (parado && !p.parado) { avisoFlotante(t, 'parado', 'Lleva ' + ((x.e.txt.match(/\d+/) || ['?'])[0]) + ' min sin escanear. Último lugar: ' + (t.ultimo ? nombrePunto(t.ultimo.orden) : 'ninguno') + '.'); tono('parado'); A.destacar[c] = now(); }
+  });
+  AL.previo = ahora;
 }
 
 function pintarMatriz() {
@@ -1036,7 +1138,7 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.05-g · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.06-b · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
 }
@@ -1047,6 +1149,10 @@ $('saveCfg').onclick = function () {
 $('bcSend').onclick = function () {
   var t = $('bcTxt').value.trim(); if (!t) return;
   adm('adminSend', '*', t, idCliente()).then(function () { $('bcTxt').value = ''; toast('Aviso enviado a todos los equipos'); refresh(true); }).catch(function (e) { toast(clean(e)); });
+};
+$('monPinBtn').onclick = function () {
+  var v = $('monPin').value.trim(); if (!v) return;
+  adm('adminSetMonitorPin', v).then(function () { $('monPin').value = ''; toast('PIN de monitores actualizado'); }).catch(function (e) { toast(clean(e)); });
 };
 $('reopenBtn').onclick = function () { adm('adminReopen').then(function () { toast('Actividad reabierta'); refresh(true); }).catch(function (e) { toast(clean(e)); }); };
 $('resetBtn').onclick = function () {

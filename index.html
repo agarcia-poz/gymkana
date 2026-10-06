@@ -153,6 +153,27 @@
   .net.on { display: block; }
   .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); background: var(--navy); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 15px; z-index: 40; display: none; max-width: 90%; text-align: center; }
   .toast.on { display: block; animation: pop .3s ease; }
+
+  /* celebraciones */
+  #fx { position: fixed; inset: 0; z-index: 45; pointer-events: none; width: 100%; height: 100%; }
+  .countdown { position: fixed; inset: 0; z-index: 44; display: none; flex-direction: column; align-items: center; justify-content: center; background: var(--grad); color: #fff; text-align: center; }
+  .countdown.on { display: flex; }
+  .countdown .lbl { font-family: 'Poppins', sans-serif; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; font-size: 14px; opacity: .85; }
+  .countdown .num { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 150px; line-height: 1; margin: 18px 0; text-shadow: 0 10px 40px rgba(0,0,0,.25); }
+  .countdown .num.tick { animation: cd .9s ease both; }
+  @keyframes cd { 0% { transform: scale(2.2); opacity: 0; } 30% { transform: scale(1); opacity: 1; } 85% { opacity: 1; } 100% { transform: scale(.7); opacity: 0; } }
+  .countdown .sub { font-size: 17px; max-width: 300px; opacity: .92; }
+  .found.celebra { animation: glow 1.6s ease; }
+  .found.celebra .tick { animation: boing .7s cubic-bezier(.3,1.6,.5,1) both; }
+  @keyframes boing { 0% { transform: scale(0) rotate(-40deg); } 100% { transform: scale(1) rotate(0); } }
+  @keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(31,138,85,.55); } 100% { box-shadow: 0 0 0 22px rgba(31,138,85,0); } }
+  .finale { text-align: center; }
+  .finale .trofeo { font-size: 72px; line-height: 1; animation: boing .9s cubic-bezier(.3,1.6,.5,1) both; }
+  .finale .crono { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 40px; margin: 6px 0 2px; letter-spacing: .02em; }
+  .finale .crono small { display: block; font-size: 12.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; opacity: .8; }
+  .finale .legado { margin-top: 18px; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,.1); border: 1px dashed rgba(255,255,255,.45); font-style: italic; }
+  .finale .legado b { font-style: normal; display: block; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 4px; opacity: .85; }
+  .sonido { margin-left: 10px; background: var(--pale); border-radius: 99px; width: 34px; height: 34px; font-size: 16px; flex: none; }
 </style>
 </head>
 <body>
@@ -170,7 +191,7 @@
     <div class="pill">Gymkana de orientación · Levántate y anda</div>
   </header>
   <div class="teambar" id="teambar">
-    <div class="team" id="team"><span class="dot"></span><span class="name" id="teamName"></span><span class="code" id="teamCode"></span></div>
+    <div class="team" id="team"><span class="dot"></span><span class="name" id="teamName"></span><span class="code" id="teamCode"></span><button class="sonido" id="sonido" aria-label="Sonido">🔊</button></div>
     <div class="progress" id="progress"><div class="bar"><i id="barFill"></i></div><small id="progressTxt"></small></div>
   </div>
   <main id="main"><div class="spinner"></div></main>
@@ -180,6 +201,9 @@
   <button class="scan" id="openScan">📷 Escanear QR</button>
   <button class="help" id="openChat">💬 Ayuda<span class="badge" id="badge">0</span></button>
 </div>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="countdown" id="countdown"><div class="lbl">Preparados…</div><div class="num" id="cdNum">3</div><div class="sub">Levántate y anda</div></div>
 
 <!-- Escáner -->
 <div class="scanner" id="scanner">
@@ -339,7 +363,8 @@
   }
 
   function mostrar(r) {
-    var veniaDeEspera = S.pantalla === 'espera';
+    var veniaDeEspera = S.pantalla === 'espera', prevTs = S.ultimoTs, prevPantalla = S.pantalla;
+    var nuevo = S.recien || prevTs !== -1 && r.ultimoTs > prevTs && r.repetido !== true;
     S.ultimoTs = r.ultimoTs; S.pantalla = r.pantalla;
     pintarCabecera(r);
     var nodos = [];
@@ -367,7 +392,7 @@
     if (r.pantalla === 'inicio') {
       if (veniaDeEspera) {
         var g = el('div', 'card go big'); g.appendChild(el('div', 'emoji', '🚩')); g.appendChild(el('h1', '', '¡Comienza la gymkana!')); g.appendChild(el('p', '', 'Levántate y anda: ¡a por la primera pista!'));
-        nodos.push(g); vibrar([200, 100, 200]);
+        nodos.push(g); cuentaAtras();
       } else {
         var c0 = el('div', 'card');
         c0.appendChild(el('div', 'eyebrow', '¡Empieza la aventura!'));
@@ -377,7 +402,7 @@
       }
       nodos.push(tarjetaPista('Vuestra primera pista', r.pista));
     } else if (r.pantalla === 'pista') {
-      var f = el('div', 'card found');
+      var f = el('div', 'card found' + (nuevo ? ' celebra' : ''));
       f.appendChild(el('div', 'tick', '✓'));
       var t = el('div'); t.appendChild(el('div', 'place', r.punto.nombre));
       t.appendChild(el('div', 'sub', r.manual ? 'Validado por la coordinación' : r.repetido === null ? 'Último lugar registrado' : r.repetido ? 'Este punto ya estaba registrado' : '¡Punto encontrado!'));
@@ -388,19 +413,26 @@
       if (r.aviso) nodos.push(el('div', 'callout aviso', r.aviso));
       nodos.push(tarjetaPista('Siguiente pista', r.pista));
       nodos.push(el('p', 'hint', 'Cuando encontréis el siguiente lugar, pulsad «Escanear QR».'));
+      if (nuevo) celebrar('ok');
     } else if (r.pantalla === 'vuelta') {
       var v = el('div', 'card big');
       v.appendChild(el('div', 'emoji', '🏁'));
       v.appendChild(el('h1', '', '¡Recorrido completado!'));
       v.appendChild(el('p', '', r.mensaje));
       nodos.push(v);
+      if (nuevo || prevPantalla === 'pista' || prevPantalla === 'inicio') celebrar('vuelta');
     } else if (r.pantalla === 'final') {
-      var fi = el('div', 'card big dark');
-      fi.appendChild(el('div', 'emoji', '✨'));
-      fi.appendChild(el('div', 'eyebrow', 'Reto final'));
-      fi.appendChild(el('h1', '', 'Levántate y anda'));
+      var fi = el('div', 'card big dark finale');
+      fi.appendChild(el('div', 'trofeo', '🏆'));
+      fi.appendChild(el('div', 'eyebrow', 'Reto final · ' + (S.equipo ? S.equipo.nombre : '')));
+      fi.appendChild(el('h1', '', '¡Lo habéis conseguido!'));
+      if (r.inicio && r.tFinal) { var cr = el('div', 'crono', duracion(r.tFinal - r.inicio)); cr.appendChild(el('small', '', 'tiempo del recorrido')); fi.appendChild(cr); }
       fi.appendChild(el('p', '', r.mensaje));
+      var lg = el('div', 'legado'); lg.appendChild(el('b', '', 'Levántate y anda'));
+      lg.appendChild(document.createTextNode('Generación tras generación, cada persona ha añadido su pieza a esta historia. Hoy habéis recorrido la de quienes os precedieron: la siguiente pieza la escribís vosotros.'));
+      fi.appendChild(lg);
       nodos.push(fi);
+      if (nuevo || prevPantalla !== 'final' && prevPantalla !== null) celebrar('final');
       $('openScan').style.display = 'none';
     }
     var sw = el('p', 'hint'); var lk = el('button', 'link', '¿No es vuestro equipo? Cambiar de equipo');
@@ -422,12 +454,71 @@
     } else if (r.pantalla === 'espera') $('progress').classList.remove('on');
   }
 
+
+  // ───── Celebraciones: confeti, sonido, cuenta atrás ─────
+  var FX = { audio: null, mudo: false, reducido: window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches };
+  try { FX.mudo = localStorage.getItem('pdv_mudo') === '1'; } catch (e) {}
+  function pintarSonido() { var b = $('sonido'); if (b) b.textContent = FX.mudo ? '🔇' : '🔊'; }
+  function audio() {
+    if (FX.mudo) return null;
+    try { if (!FX.audio) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; FX.audio = new C(); } if (FX.audio.state === 'suspended') FX.audio.resume(); } catch (e) { return null; }
+    return FX.audio;
+  }
+  // El audio del móvil solo se activa tras un toque: lo desbloqueamos en el primer gesto.
+  ['touchstart', 'click'].forEach(function (ev) { document.addEventListener(ev, function u() { audio(); document.removeEventListener(ev, u); }, { passive: true }); });
+  function nota(ac, f, t0, dur, vol, tipo) {
+    var o = ac.createOscillator(), g = ac.createGain(); o.type = tipo || 'triangle'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol || 0.18, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(ac.destination); o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function sonido(tipo) {
+    var ac = audio(); if (!ac) return; var t = ac.currentTime + 0.02;
+    if (tipo === 'ok') { nota(ac, 880, t, 0.18); nota(ac, 1318.5, t + 0.12, 0.35); }
+    else if (tipo === 'beep') nota(ac, 660, t, 0.22, 0.2, 'sine');
+    else if (tipo === 'ya') { nota(ac, 1046.5, t, 0.5, 0.22, 'sine'); }
+    else if (tipo === 'fanfarria') { [523.25, 659.25, 783.99, 1046.5].forEach(function (f, i) { nota(ac, f, t + i * 0.13, 0.32); }); nota(ac, 1318.5, t + 0.55, 0.9, 0.2); nota(ac, 783.99, t + 0.55, 0.9, 0.12); }
+  }
+  function confeti(cantidad, duracion) {
+    if (FX.reducido) return;
+    var cv = $('fx'), ctx = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1);
+    var W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr;
+    var team = getComputedStyle(document.documentElement).getPropertyValue('--team').trim() || '#0B4FA8';
+    var col = [team, '#1E88E5', '#F5B800', '#1F8A55', '#E53935', '#8FD0FF', '#FFFFFF'];
+    var P = [];
+    for (var i = 0; i < cantidad; i++) P.push({ x: W / 2 + (Math.random() - .5) * W * .3, y: H * .35, vx: (Math.random() - .5) * 18 * dpr, vy: (-Math.random() * 16 - 6) * dpr,
+      w: (6 + Math.random() * 6) * dpr, h: (8 + Math.random() * 10) * dpr, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: col[i % col.length] });
+    var t0 = performance.now(), fin = duracion || 2600;
+    (function frame(now) {
+      var k = (now - t0) / fin; ctx.clearRect(0, 0, W, H);
+      if (k >= 1) return;
+      ctx.globalAlpha = k > .7 ? (1 - k) / .3 : 1;
+      P.forEach(function (p) { p.vy += .45 * dpr; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2))); ctx.restore(); });
+      requestAnimationFrame(frame);
+    })(t0);
+  }
+  function celebrar(nivel) {
+    if (nivel === 'ok') { sonido('ok'); vibrar([60, 40, 120]); confeti(70, 2000); }
+    else if (nivel === 'vuelta') { sonido('fanfarria'); vibrar([120, 60, 120, 60, 240]); confeti(160, 3200); }
+    else if (nivel === 'final') { sonido('fanfarria'); vibrar([200, 80, 200, 80, 400]); confeti(240, 4200); setTimeout(function () { confeti(140, 3000); }, 1600); }
+  }
+  function cuentaAtras(fin) {
+    var box = $('countdown'), n = $('cdNum'), pasos = ['3', '2', '1', '¡Ya!'], i = 0;
+    box.classList.add('on');
+    (function paso() {
+      if (i === pasos.length) { box.classList.remove('on'); celebrar('vuelta'); fin && fin(); return; }
+      n.textContent = pasos[i]; n.classList.remove('tick'); void n.offsetWidth; n.classList.add('tick');
+      sonido(i < 3 ? 'beep' : 'ya'); vibrar(i < 3 ? 80 : 300); i++; setTimeout(paso, 900);
+    })();
+  }
+  function duracion(ms) { var s = Math.max(0, Math.round(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + ('0' + m).slice(-2) : m) + ':' + ('0' + x).slice(-2); }
+
   // ───── Flujo ─────
   function setEquipo(eq) { S.codigo = eq.codigo; S.equipo = eq; store(KEY, eq.codigo); pintarCabecera({ equipo: eq }); }
 
   function escanear(token) {
     render([el('div', 'spinner')]);
-    return api('apiScan', S.codigo, token).then(function (r) { mostrar(r); vibrar(120); })
+    return api('apiScan', S.codigo, token).then(function (r) { S.recien = r.repetido === false; mostrar(r); S.recien = false; })
       .catch(function (e) {
         var m = cleanMsg(e);
         if (/ningún equipo/.test(m)) { store(KEY, null); INIT.q = token; pantallaLogin(m); return; }
@@ -511,6 +602,8 @@
     procesarMensajes(S.mensajes);
     siguienteAviso();
   }
+  $('sonido').onclick = function () { FX.mudo = !FX.mudo; try { localStorage.setItem('pdv_mudo', FX.mudo ? '1' : '0'); } catch (e) {} pintarSonido(); if (!FX.mudo) sonido('ok'); };
+  pintarSonido();
   $('alertOk').onclick = function () { cerrarAviso(false); };
   $('alertReply').onclick = function () { cerrarAviso(true); };
 
