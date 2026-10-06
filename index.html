@@ -97,6 +97,12 @@
   .fab .help { flex: 1; background: #fff; color: var(--navy); border: 1.5px solid var(--line); position: relative; }
   .badge { position: absolute; top: -7px; right: -5px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--err); color: #fff; font-size: 13px; display: none; place-items: center; font-family: 'Nunito Sans', sans-serif; }
   .badge.on { display: grid; }
+  .amable { text-align: center; }
+  .amable h2 { margin: 6px 0 4px; }
+  .amable .calma { min-height: 48px; margin: 10px auto 0; max-width: 330px; font-size: 15px; color: var(--muted); transition: opacity .35s; }
+  .amable .calma.fuera { opacity: 0; }
+  .calmita { margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center; min-height: 20px; }
+  .ver-pag { margin-top: 6px; font-size: 11.5px; color: #9AAAC0; text-align: center; }
   .registrando { text-align: center; }
   .registrando h2 { margin: 6px 0 4px; }
   .registrando .lento { margin-top: 14px; font-size: 15px; color: var(--muted); display: none; }
@@ -224,7 +230,7 @@
     <div class="team" id="team"><span class="dot"></span><span class="name" id="teamName"></span><span class="code" id="teamCode"></span><button class="listabtn" id="listaBtn" aria-label="Pasar lista">📋 <span id="listaN"></span></button><button class="sonido" id="sonido" aria-label="Sonido">🔊</button></div>
     <div class="progress" id="progress"><div class="bar"><i id="barFill"></i></div><small id="progressTxt"></small></div>
   </div>
-  <main id="main"><div class="spinner"></div></main>
+  <main id="main"><div class="card amable"><div class="spinner"></div><h2>Cargando…</h2></div></main>
 </div>
 
 <div class="fab" id="fab" style="display:none">
@@ -283,7 +289,7 @@
   <div class="txt" id="alertTxt"></div>
   <div class="row"><button class="ghost hidden" id="alertReply">Responder</button><button id="alertOk">Entendido</button></div>
 </div>
-<div class="net" id="net">📶 Conexión inestable: reconectando…</div>
+<div class="net" id="net">📶 La conexión va lenta. Tranquilidad: seguimos intentándolo solos.</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -293,6 +299,7 @@
   })();
   // Se limpia la dirección para que recargar la página no vuelva a escanear el mismo QR
   if (INIT.q || INIT.t) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
+  var VERSION_PAGINA = '2026.10.06-e';
   var KEY = 'pdv_equipo';
   var POLL_MS = 5000;
   var S = { codigo: null, equipo: null, ver: 0, ultimoTs: -1, pantalla: null, mensajes: [], chatOpen: false, poll: null, busy: false, cola: [], seq: 0, escaneando: false };
@@ -334,6 +341,46 @@
     try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }
     catch (e) { if (v === undefined) return k in MEM ? MEM[k] : null; if (v === null) delete MEM[k]; else MEM[k] = v; return null; }
   }
+  // Mensajes de calma: cambian solos mientras se espera (no hace falta recargar)
+  var CALMA = [
+    'Estamos conectando con el servidor de la gymkana. Puede tardar unos segundos.',
+    'Hay muchos equipos a la vez 😊 Tranquilidad: no hace falta recargar ni volver a escanear.',
+    'Ignacio tardó años en llegar a Roma… esto solo son unos segundos 😉',
+    'Respirad hondo: vuestra pista ya está en camino.',
+    'Aprovechad para mirar a vuestro alrededor: ¿qué historia guardará este lugar?',
+    'Seguimos intentándolo por vosotros. Sin prisa, pero sin pausa.'
+  ];
+  function calmar(nodo, primero) {
+    var i = -1, t0 = setTimeout(paso, primero || 3000), t1 = null;
+    function paso() {
+      if (!document.body.contains(nodo)) { clearInterval(t1); return; }
+      i = (i + 1) % CALMA.length; nodo.classList.add('fuera');
+      setTimeout(function () { nodo.textContent = CALMA[i]; nodo.classList.remove('fuera'); }, 350);
+      if (!t1) t1 = setInterval(paso, 6000);
+    }
+    return function () { clearTimeout(t0); clearInterval(t1); };
+  }
+  function esperaAmable(titulo) {
+    var c = document.createElement('div'); c.className = 'card amable';
+    var sp = document.createElement('div'); sp.className = 'spinner'; c.appendChild(sp);
+    var h = document.createElement('h2'); h.textContent = titulo || 'Cargando…'; c.appendChild(h);
+    var m = document.createElement('p'); m.className = 'calma'; c.appendChild(m);
+    calmar(m, 2500);
+    return c;
+  }
+  // Si la página guardada en el móvil es más antigua que el servidor, se actualiza sola (una vez por versión)
+  function comprobarVersion() {
+    llamarApi('apiPing', [], 10000).then(function (r) {
+      var v = String(r && r.version || '');
+      if (!v || v <= VERSION_PAGINA) return;
+      var marca = 'pdv_recarga_' + v;
+      try { if (sessionStorage.getItem(marca)) return; sessionStorage.setItem(marca, '1'); } catch (e) { return; }
+      (function recargar() {
+        if (S.escaneando) { setTimeout(recargar, 2000); return; }
+        location.replace(location.pathname + '?v=' + encodeURIComponent(v));
+      })();
+    }).catch(function () {});
+  }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
   function toast(t) { var x = $('toast'); x.textContent = t; x.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function () { x.classList.remove('on'); }, 3200); }
   function hora(ts) { var d = new Date(ts); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
@@ -355,9 +402,10 @@
     var e = el('div', 'err', error || '');
     function go() {
       var v = inp.value.trim().toUpperCase(); if (!v) return;
-      b.disabled = true; b.textContent = 'Comprobando…';
-      api('apiJoin', v).then(function (eq) { setEquipo(eq); continuar(); })
-        .catch(function (er) { b.disabled = false; b.textContent = 'Entrar'; e.textContent = cleanMsg(er); });
+      b.disabled = true; b.textContent = 'Comprobando…'; e.textContent = '';
+      var cm = el('p', 'calmita'); c.appendChild(cm); var parar = calmar(cm, 3000);
+      api('apiJoin', v).then(function (eq) { parar(); setEquipo(eq); continuar(); })
+        .catch(function (er) { parar(); cm.remove(); b.disabled = false; b.textContent = 'Entrar'; e.textContent = cleanMsg(er); });
     }
     b.onclick = go; inp.onkeydown = function (ev) { if (ev.key === 'Enter') go(); };
     c.appendChild(lb); c.appendChild(inp); c.appendChild(b); c.appendChild(e);
@@ -478,6 +526,7 @@
       $('openScan').style.display = 'none';
     }
     var sw = el('p', 'hint'); var lk = el('button', 'link', '¿No es vuestro equipo? Cambiar de equipo');
+    setTimeout(function () { if (!sw.querySelector('.ver-pag')) sw.appendChild(el('div', 'ver-pag', 'v' + VERSION_PAGINA)); }, 0);
     lk.onclick = function () { if (confirm('¿Salir de este equipo en este móvil?')) { store(KEY, null); location.reload(); } };
     sw.appendChild(lk); nodos.push(sw);
     render(nodos);
@@ -561,8 +610,16 @@
   // ───── Pasar lista (capitanía) ─────
   var L = { datos: null, pend: 0, abierta: false, t: null };
   function cargarLista() {
-    if (!S.codigo || L.pend) return Promise.resolve();
-    return llamarApi('apiRoster', [S.codigo], 12000).then(function (d) { if (!L.pend) { L.datos = d; pintarBotonLista(); if (L.abierta) pintarLista(); } }).catch(function () {});
+    if (!S.codigo || L.pend || L.cargando) return Promise.resolve();
+    L.cargando = true;
+    return llamarApi('apiRoster', [S.codigo], 15000).then(function (d) {
+      L.cargando = false; L.fallos = 0;
+      if (!L.pend) { L.datos = d; pintarBotonLista(); if (L.abierta) pintarLista(); }
+    }).catch(function () {
+      // si falla (conexión lenta o Google arrancando), se vuelve a intentar sola con espera creciente
+      L.cargando = false; L.fallos = (L.fallos || 0) + 1;
+      if (!L.datos) setTimeout(cargarLista, Math.min(30000, 3000 * L.fallos));
+    });
   }
   function cuentaLista() { var a = (L.datos && L.datos.alumnos) || []; return { total: a.length, pres: a.filter(function (x) { return x.presente; }).length }; }
   function pintarBotonLista() {
@@ -590,7 +647,7 @@
     });
   }
   function pintarLista() {
-    var box = $('lst'); box.innerHTML = ''; if (!L.datos) { box.appendChild(el('div', 'spinner')); return; }
+    var box = $('lst'); box.innerHTML = ''; if (!L.datos) { box.appendChild(esperaAmable('Cargando la lista…')); return; }
     var d = L.datos, c = cuentaLista();
     if (d.capitanes.length) box.appendChild(el('div', 'caps', '👑 Capitanía: ' + d.capitanes.join(', ')));
     var cn = el('div', 'cnt'); cn.appendChild(el('b', '', c.pres + ' de ' + c.total)); cn.appendChild(el('span', '', c.pres === c.total ? '¡estáis todos!' : 'presentes'));
@@ -622,6 +679,7 @@
     c.appendChild(el('div', 'spinner'));
     c.appendChild(el('h2', '', 'Registrando el lugar…'));
     c.appendChild(el('p', 'lento', 'La conexión va un poco lenta. Seguimos intentándolo: no hace falta volver a escanear.'));
+    var cm = el('p', 'calma'); c.appendChild(cm); setTimeout(function () { calmar(cm, 3000); }, 5000);
     var b = el('button', 'btn', 'Seguir sin esperar'); c.appendChild(b);
     render([c]);
     var tTarde = setTimeout(function () { c.classList.add('tarde'); }, 5000);
@@ -654,6 +712,8 @@
       var q = INIT.q; INIT.q = '';
       escanear(q).then(arrancarPoll);
     } else {
+      if (!$('main').querySelector('.amable')) render([esperaAmable('Cargando vuestra pantalla…')]);
+      else calmar($('main').querySelector('.amable').appendChild(el('p', 'calma')), 2500);
       api('apiState', S.codigo, 0).then(function (r) { S.ver = r.ver; mostrar(r); procesarMensajes(r.mensajes || [], true); arrancarPoll(); })
         .catch(function (e) { store(KEY, null); pantallaLogin(cleanMsg(e)); });
     }
@@ -662,7 +722,7 @@
   // Sondeo con espera progresiva: si hay cortes, se espacian las consultas y se avisa discretamente
   S.fallos = 0;
   function arrancarPoll() { if (S.poll) return; S.poll = true; setTimeout(bucle, 1200); }
-  function bucle() { poll(); setTimeout(bucle, S.fallos ? Math.min(20000, POLL_MS * (1 + S.fallos)) : POLL_MS); }
+  function bucle() { if (!L.datos && !L.cargando) cargarLista(); poll(); setTimeout(bucle, S.fallos ? Math.min(20000, POLL_MS * (1 + S.fallos)) : POLL_MS); }
   function red(ok) {
     if (ok) { S.fallos = 0; $('net').classList.remove('on'); return; }
     S.fallos++; if (S.fallos >= 2) $('net').classList.add('on');
@@ -840,6 +900,7 @@
 
   // ───── Arranque ─────
   (function init() {
+    setTimeout(comprobarVersion, 1500);
     var desdeTarjeta = INIT.t;
     var guardado = store(KEY);
     if (desdeTarjeta && desdeTarjeta !== guardado) {

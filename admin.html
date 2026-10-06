@@ -509,7 +509,7 @@ function adm(fn) {
   if (!boton || boton.tagName !== 'BUTTON' || boton.closest('#nav')) boton = null;
   A.enCurso = (A.enCurso || 0) + 1; document.body.classList.add('cargando');
   if (boton) { boton.classList.add('esperando'); boton.disabled = true; }
-  var lento = setTimeout(function () { toast('Guardando… la conexión con Google va algo lenta'); }, 4000);
+  var lento = setTimeout(function () { toast('Un momento, guardando… Google va algo lento: no hace falta volver a pulsar 🙂'); }, 4000);
   function fin() { clearTimeout(lento); A.enCurso--; if (!A.enCurso) document.body.classList.remove('cargando'); if (boton) { boton.classList.remove('esperando'); boton.disabled = false; } }
   return api.apply(null, [fn, A.pin].concat(a)).then(function (r) { fin(); return r; }, function (e) { fin(); throw e; });
 }
@@ -526,7 +526,7 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.06-d') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.06-e') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -539,7 +539,7 @@ function login(pin) {
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-d, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-e, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -1326,7 +1326,7 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.06-d · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.06-e · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
 }
