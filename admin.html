@@ -136,6 +136,9 @@
   .empty { margin: auto; color: var(--muted); text-align: center; padding: 30px; }
   /* puntos */
   .plist .pt { display: grid; grid-template-columns: 46px 1.3fr 120px 64px 76px 2.6fr 1.4fr 92px; gap: 8px; align-items: start; padding: 10px 0; border-bottom: 1px solid var(--line-2); }
+  .plist .nota-mon { grid-column: 2 / -2; background: #FFF9EA; border: 1px dashed #EAC66A; border-radius: 10px; padding: 8px 10px; }
+  .plist .nota-mon label { display: block; font-size: 12px; font-weight: 800; color: #8A6400; margin-bottom: 4px; }
+  .plist .nota-mon textarea { min-height: 52px; background: #fff; }
   .plist .pt.head { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; padding-top: 0; }
   .num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--line-2); font-weight: 700; font-variant-numeric: tabular-nums; }
   .num.prueba { background: var(--gold); } .num.inicio { background: var(--navy); color: #fff; }
@@ -424,6 +427,7 @@
     <div class="grid2">
       <div class="card">
         <h2>Avisos y mensajes</h2>
+        <label class="row small" style="gap:8px;margin:0 0 12px;cursor:pointer"><input type="checkbox" id="cfgOrden"> <span><b>Exigir el orden del recorrido.</b> Si un equipo escanea un lugar que no es el siguiente, no se registra y se le recuerda su pista. (Si falta un QR, valídalo a mano desde Seguimiento.)</span></label>
         <label class="small muted">Minutos sin escanear para marcar a un equipo en alerta</label>
         <input class="f" id="cfgAlerta" type="number" min="3" max="60" style="width:110px;margin-bottom:12px">
         <label class="small muted">Mensaje al pasar por el Patio sin haber terminado</label>
@@ -528,7 +532,7 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.06-g') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.06-i') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -541,7 +545,7 @@ function login(pin) {
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-g, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-i, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -1073,6 +1077,11 @@ function pintarPuntos() {
     acts.appendChild(up); acts.appendChild(dn); acts.appendChild(rm);
     if (p.tipo !== 'prueba') { lt.disabled = true; an.disabled = true; }
     [nm, tp, lt, an, ps, dr, acts].forEach(function (x) { r.appendChild(x); });
+    if (p.tipo === 'prueba' || i === 0) {
+      var nw = el('div', 'nota-mon'); nw.appendChild(el('label', '', '📝 Nota para los monitores' + (i === 0 ? ' del reto final' : ' de esta prueba')));
+      var nt = el('textarea', 'f'); nt.value = p.nota || ''; nt.placeholder = i === 0 ? 'Ej.: El código del cofre es…; los rotuladores están en…' : 'Ej.: Material en el armario 2; tiempo máximo 5 min; qué hacer si…';
+      nt.oninput = function () { p.nota = nt.value; }; nw.appendChild(nt); r.appendChild(nw);
+    }
     box.appendChild(r);
   });
 }
@@ -1342,12 +1351,13 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.06-g · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.06-i · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
+  $('cfgOrden').checked = String(c.ordenEstricto || 'si') !== 'no';
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
 }
 $('saveCfg').onclick = function () {
-  adm('adminSaveConfig', { alertaMin: Number($('cfgAlerta').value) || 10, mensajePatio: $('cfgPatio').value, mensajeVuelta: $('cfgVuelta').value, mensajeFinal: $('cfgFinal').value })
+  adm('adminSaveConfig', { ordenEstricto: $('cfgOrden').checked ? 'si' : 'no', alertaMin: Number($('cfgAlerta').value) || 10, mensajePatio: $('cfgPatio').value, mensajeVuelta: $('cfgVuelta').value, mensajeFinal: $('cfgFinal').value })
     .then(function () { toast('Ajustes guardados'); refresh(true); }).catch(function (e) { toast(clean(e)); });
 };
 $('bcSend').onclick = function () {

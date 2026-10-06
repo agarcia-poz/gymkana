@@ -203,6 +203,11 @@
   .found.celebra .tick { animation: boing .7s cubic-bezier(.3,1.6,.5,1) both; }
   @keyframes boing { 0% { transform: scale(0) rotate(-40deg); } 100% { transform: scale(1) rotate(0); } }
   @keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(31,138,85,.55); } 100% { box-shadow: 0 0 0 22px rgba(31,138,85,0); } }
+  .rechazo { background: #FFF3DC; border: 1.5px solid #F2C36B; border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; animation: sacudir .5s ease; }
+  .rechazo .ic { font-size: 30px; line-height: 1; }
+  .rechazo b { display: block; font-family: 'Poppins', sans-serif; font-size: 17px; color: #7A4B00; margin-bottom: 2px; }
+  .rechazo span { color: #7A4B00; font-size: 15px; }
+  @keyframes sacudir { 0%,100% { transform: none; } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
   .vuelta h1 { font-size: 30px; line-height: 1.15; margin: 4px 0 8px; }
   .vuelta .emoji { font-size: 64px; animation: boing .9s cubic-bezier(.3,1.6,.5,1) both; }
   .pasos-final { margin-top: 16px; text-align: left; display: grid; gap: 8px; }
@@ -304,7 +309,7 @@
   })();
   // Se limpia la dirección para que recargar la página no vuelva a escanear el mismo QR
   if (INIT.q || INIT.t) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
-  var VERSION_PAGINA = '2026.10.06-g';
+  var VERSION_PAGINA = '2026.10.06-i';
   var KEY = 'pdv_equipo';
   var POLL_MS = 5000;
   var S = { codigo: null, equipo: null, ver: 0, ultimoTs: -1, pantalla: null, mensajes: [], chatOpen: false, poll: null, busy: false, cola: [], seq: 0, escaneando: false };
@@ -459,7 +464,7 @@
   function mostrar(r) {
     if (!sesionValida(r)) return;
     S.repintar = false;
-    var veniaDeEspera = S.pantalla === 'espera', prevTs = S.ultimoTs, prevPantalla = S.pantalla;
+    var veniaDeEspera = S.pantalla === 'espera', prevTs = S.ultimoTs, prevPantalla = S.pantalla, veniaDe = S.pantalla;
     var nuevo = S.recien || prevTs !== -1 && r.ultimoTs > prevTs && r.repetido !== true;
     S.ultimoTs = r.ultimoTs; S.pantalla = r.pantalla;
     pintarCabecera(r);
@@ -471,20 +476,36 @@
       return;
     }
     if (r.pantalla === 'terminada') {
-      var tc = el('div', 'card big dark');
-      tc.appendChild(el('div', 'emoji', '🏁'));
-      tc.appendChild(el('div', 'eyebrow', 'Fin de la gymkana'));
+      // Fin de la actividad: todos los equipos reciben el mismo mensaje final (todos escriben en el mural)
+      var tc = el('div', 'card big dark finale');
+      tc.appendChild(el('div', 'trofeo', '🏁'));
+      tc.appendChild(el('div', 'eyebrow', 'Fin de la gymkana · ' + (S.equipo ? S.equipo.nombre : '')));
       tc.appendChild(el('h1', '', '¡Gracias por caminar juntos!'));
-      tc.appendChild(el('p', '', r.mensaje));
+      if (r.mensaje) tc.appendChild(el('p', '', r.mensaje));
+      if (r.mensajeFinal) tc.appendChild(el('p', '', r.mensajeFinal));
       var st = el('div', 'stats');
       var s1 = el('div'); s1.appendChild(el('b', '', String(r.progreso.hechos))); s1.appendChild(el('span', '', 'lugares encontrados')); st.appendChild(s1);
       if (r.finalizado) { var s2 = el('div'); s2.appendChild(el('b', '', '✓')); s2.appendChild(el('span', '', 'reto final')); st.appendChild(s2); }
       tc.appendChild(st);
+      var lgT = el('div', 'legado'); lgT.appendChild(el('b', '', 'Levántate y anda'));
+      lgT.appendChild(document.createTextNode('Generación tras generación, cada persona ha añadido su pieza a esta historia. Hoy habéis recorrido la de quienes os precedieron: la siguiente pieza la escribís vosotros.'));
+      tc.appendChild(lgT);
       render([tc]);
+      if (veniaDe !== null && veniaDe !== 'terminada') celebrar('vuelta');
       $('fab').style.display = 'flex'; $('openScan').style.display = 'none';
       return;
     }
     $('openScan').style.display = '';
+    // QR escaneado fuera de orden o Patio antes de tiempo: no se registra y se recuerda la pista
+    if (r.rechazado || r.patioPronto) {
+      var rz = el('div', 'rechazo'); rz.appendChild(el('div', 'ic', r.patioPronto ? '🏛️' : '🧭'));
+      var rt = el('div');
+      if (r.patioPronto) { rt.appendChild(el('b', '', 'Aún no toca el Patio')); rt.appendChild(el('span', '', r.patioPronto + ' Este escaneo no se ha registrado: seguid vuestra pista.')); }
+      else { rt.appendChild(el('b', '', 'Este no es vuestro siguiente lugar')); rt.appendChild(el('span', '', 'Habéis escaneado «' + r.rechazado.nombre + '», pero vuestra pista os lleva a otro sitio. No se ha registrado. Volved a leer la pista y buscad el lugar correcto.')); }
+      rz.appendChild(rt); nodos.push(rz);
+      vibrar([180, 90, 180]); sonido('error');
+      FX.gen = (FX.gen || 0) + 1; try { var cvx = $('fx'); cvx.getContext('2d').clearRect(0, 0, cvx.width, cvx.height); } catch (e) {}
+    }
     if (r.pantalla === 'inicio') {
       if (veniaDeEspera) {
         var g = el('div', 'card go big'); g.appendChild(el('div', 'emoji', '🚩')); g.appendChild(el('h1', '', '¡Comienza la gymkana!')); g.appendChild(el('p', '', 'Levántate y anda: ¡a por la primera pista!'));
@@ -583,6 +604,7 @@
     var ac = audio(); if (!ac) return; var t = ac.currentTime + 0.02;
     if (tipo === 'ok') { nota(ac, 880, t, 0.18); nota(ac, 1318.5, t + 0.12, 0.35); }
     else if (tipo === 'beep') nota(ac, 660, t, 0.22, 0.2, 'sine');
+    else if (tipo === 'error') { nota(ac, 330, t, 0.18, 0.16, 'square'); nota(ac, 247, t + 0.2, 0.3, 0.16, 'square'); }
     else if (tipo === 'ya') { nota(ac, 1046.5, t, 0.5, 0.22, 'sine'); }
     else if (tipo === 'fanfarria') { [523.25, 659.25, 783.99, 1046.5].forEach(function (f, i) { nota(ac, f, t + i * 0.13, 0.32); }); nota(ac, 1318.5, t + 0.55, 0.9, 0.2); nota(ac, 783.99, t + 0.55, 0.9, 0.12); }
   }
@@ -595,10 +617,10 @@
     var P = [];
     for (var i = 0; i < cantidad; i++) P.push({ x: W / 2 + (Math.random() - .5) * W * .3, y: H * .35, vx: (Math.random() - .5) * 18 * dpr, vy: (-Math.random() * 16 - 6) * dpr,
       w: (6 + Math.random() * 6) * dpr, h: (8 + Math.random() * 10) * dpr, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: col[i % col.length] });
-    var t0 = performance.now(), fin = duracion || 2600;
+    var t0 = performance.now(), fin = duracion || 2600, gen = FX.gen = (FX.gen || 0) + 1;
     (function frame(now) {
       var k = (now - t0) / fin; ctx.clearRect(0, 0, W, H);
-      if (k >= 1) return;
+      if (k >= 1 || gen !== FX.gen) return;
       ctx.globalAlpha = k > .7 ? (1 - k) / .3 : 1;
       P.forEach(function (p) { p.vy += .45 * dpr; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
         ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2))); ctx.restore(); });
