@@ -175,11 +175,15 @@
   .gcard h4 small { color: var(--muted); font-weight: 700; }
   .gcard .cu { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; color: var(--muted); margin-top: 6px; text-transform: uppercase; }
   .gcard .cap { color: #9A6B00; font-weight: 700; }
-  .miembros { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 14px; padding: 6px 4px 10px; }
+  .miembros { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 6px 14px; padding: 6px 4px 10px; }
   .miembro { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
   .miembro .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .miembro .ok { color: var(--ok); font-weight: 800; }
   .miembro select { width: 130px; padding: 3px 6px; font-size: 12.5px; }
+  .miembro .mini { background: none; border: 0; cursor: pointer; font-size: 14px; padding: 2px 4px; opacity: .65; }
+  .miembro .mini:hover { opacity: 1; }
+  .add-al { display: flex; gap: 8px; align-items: flex-start; margin: 4px 4px 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+  .add-al textarea { flex: 1; min-height: 40px; font-size: 13.5px; }
   .cbadge { display: inline-block; font-size: 11px; font-weight: 800; border-radius: 6px; padding: 1px 6px; background: var(--line-2, #EEF3F9); color: var(--muted); }
   .cbadge.c3 { background: #FFF3DC; color: #9A6B00; }
   .lchip { font-size: 12px; font-weight: 800; border-radius: 99px; padding: 1px 8px; margin-left: 6px; background: #EEF3F9; color: var(--muted); white-space: nowrap; }
@@ -339,7 +343,7 @@
   <section class="wrap tab hidden" id="tab-equipos">
     <div class="card" style="margin-bottom:16px">
       <h2>Formar equipos con el alumnado</h2>
-      <p class="sub">Pega los nombres, uno por línea (puedes copiarlos de una columna de Excel). Cada equipo tendrá, en lo posible, la mitad de alumnado de 1º y la mitad de 2º. Los capitanes y capitanas de 3º se reparten entre los equipos: si hay más que equipos, algunos tendrán 2 o 3.</p>
+      <p class="sub"><b>Úsalo solo para formar los equipos desde cero.</b> Para cambios puntuales (añadir, quitar o mover a alguien, o añadir un equipo) usa la tabla de equipos de más abajo: así no cambian los códigos ni las tarjetas. Pega los nombres, uno por línea (puedes copiarlos de una columna de Excel). Cada equipo tendrá, en lo posible, la mitad de alumnado de 1º y la mitad de 2º. Los capitanes y capitanas de 3º se reparten entre los equipos: si hay más que equipos, algunos tendrán 2 o 3.</p>
       <div class="grid3">
         <div class="lista-al"><label for="g1">1º curso <small id="g1n">0</small></label><textarea class="f" id="g1" placeholder="Un nombre por línea"></textarea></div>
         <div class="lista-al"><label for="g2">2º curso <small id="g2n">0</small></label><textarea class="f" id="g2" placeholder="Un nombre por línea"></textarea></div>
@@ -376,7 +380,7 @@
       </div>
     </div>
     <div class="card" style="margin-top:16px">
-      <div class="row" style="margin-bottom:8px"><h2 class="grow">Equipos</h2><button class="btn danger" id="delAllTeams">Borrar todos los equipos</button><button class="btn primary" id="saveTeams">Guardar cambios</button></div>
+      <div class="row" style="margin-bottom:8px"><h2 class="grow">Equipos</h2><button class="btn" id="addTeam">＋ Añadir equipo</button><button class="btn danger" id="delAllTeams">Borrar todos los equipos</button><button class="btn primary" id="saveTeams">Guardar cambios</button></div>
       <table><thead><tr><th style="width:60px">Color</th><th>Nombre</th><th style="width:110px">Código</th><th>Alumnado</th><th>Punto de salida</th><th style="width:60px"></th></tr></thead><tbody id="teamEdit"></tbody></table>
       <div id="sinEquipo"></div>
     </div>
@@ -544,7 +548,7 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.06-j') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.07-a') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -557,7 +561,7 @@ function login(pin) {
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.06-j, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.07-a, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -926,25 +930,43 @@ function pintarEquipos() {
         resumen.appendChild(document.createTextNode(n1 + ' de 1º · ' + n2 + ' de 2º'));
         resumen.appendChild(el('span', 'lchip' + (pres && pres === n1 + n2 ? ' ok' : ''), '📋 ' + pres + '/' + (n1 + n2)));
         resumen.appendChild(el('div', 'muted', caps.length ? '👑 ' + caps.map(function (a) { return a.nombre; }).join(', ') : 'Sin capitanía'));
-        var ver = el('button', 'btn sm', A.abiertos[t.codigo] ? 'Ocultar' : '👥 Ver y mover'); ver.style.marginTop = '4px';
-        ver.onclick = function () { A.abiertos[t.codigo] = !A.abiertos[t.codigo]; pintarEquipos(); };
-        resumen.appendChild(ver);
-      } else resumen.appendChild(el('span', 'muted', '—'));
+      } else resumen.appendChild(el('div', 'muted', 'Sin alumnado'));
+      var ver = el('button', 'btn sm', A.abiertos[t.codigo] ? 'Ocultar' : (mios.length ? '👥 Ver y editar' : '＋ Añadir personas')); ver.style.marginTop = '4px';
+      ver.onclick = function () { A.abiertos[t.codigo] = !A.abiertos[t.codigo]; pintarEquipos(); };
+      resumen.appendChild(ver);
       [c, n, cod, resumen, s, del].forEach(function (x) { var td = el('td'); td.appendChild(x); tr.appendChild(td); });
       tb.appendChild(tr);
-      if (A.abiertos[t.codigo] && mios.length) {
+      if (A.abiertos[t.codigo]) {
         var sub = el('tr'), td = el('td'); td.colSpan = 6; td.style.background = '#F7FAFE';
-        td.appendChild(listaMiembros(mios)); sub.appendChild(td); tb.appendChild(sub);
+        td.appendChild(listaMiembros(mios, t.codigo)); sub.appendChild(td); tb.appendChild(sub);
       }
     });
     var sin = (A.alumnos || []).filter(function (a) { return !a.equipo; }), box = $('sinEquipo'); box.innerHTML = '';
-    if (sin.length && A.teams.length) { box.appendChild(el('h3', '', 'Sin equipo (' + sin.length + ')')); box.appendChild(listaMiembros(sin)); }
+    if (sin.length && A.teams.length) { box.appendChild(el('h3', '', 'Sin equipo (' + sin.length + ')')); box.appendChild(listaMiembros(sin, '')); }
   });
 }
-function listaMiembros(lista) {
-  var g = el('div', 'miembros');
+var CURSOS_OPC = [[1, '1º'], [2, '2º'], [3, '👑 3º (capitanía)']];
+function selCurso(valor) { var s = el('select', 'f'); CURSOS_OPC.forEach(function (c) { var o = el('option', '', c[1]); o.value = c[0]; if (Number(valor) === c[0]) o.selected = true; s.appendChild(o); }); return s; }
+function listaMiembros(lista, codigo) {
+  var cont = el('div');
+  var g = el('div', 'miembros'); cont.appendChild(g);
+  if (!lista.length) g.appendChild(el('div', 'muted small', 'Este equipo todavía no tiene alumnado.'));
   lista.slice().sort(function (a, b) { return a.curso - b.curso || a.nombre.localeCompare(b.nombre); }).forEach(function (a) {
     var m = el('div', 'miembro');
+    if (A.editando === a.id) {
+      // edición en línea: nombre y curso
+      var inp = el('input', 'f'); inp.value = a.nombre; inp.style.flex = '1';
+      var cs = selCurso(a.curso); cs.style.width = '120px';
+      var ok = el('button', 'btn sm primary', 'Guardar'), no = el('button', 'btn sm', '✕');
+      ok.onclick = function () {
+        adm('adminUpdateStudent', a.id, { nombre: inp.value, curso: Number(cs.value) }).then(function (n) { a.nombre = n.nombre; a.curso = n.curso; a.presente = n.presente; A.editando = null; toast('Cambios guardados'); pintarEquipos(); refresh(true); }).catch(function (e) { toast(clean(e)); });
+      };
+      no.onclick = function () { A.editando = null; pintarEquipos(); };
+      inp.onkeydown = function (ev) { if (ev.key === 'Enter') ok.onclick(); if (ev.key === 'Escape') no.onclick(); };
+      [inp, cs, ok, no].forEach(function (x) { m.appendChild(x); }); g.appendChild(m);
+      setTimeout(function () { inp.focus(); }, 30);
+      return;
+    }
     m.appendChild(el('span', 'cbadge' + (a.curso === 3 ? ' c3' : ''), a.curso === 3 ? '👑 3º' : a.curso + 'º'));
     m.appendChild(el('span', 'nm', a.nombre));
     if (a.presente) m.appendChild(el('span', 'ok', '✓'));
@@ -955,9 +977,27 @@ function listaMiembros(lista) {
       adm('adminMoveStudent', a.id, sel.value).then(function (nuevo) { a.equipo = nuevo.equipo; a.presente = false; toast(a.nombre + ' → ' + (sel.options[sel.selectedIndex].text)); if (sel.value) A.abiertos[sel.value] = true; pintarEquipos(); refresh(true); })
         .catch(function (e) { toast(clean(e)); pintarEquipos(); });
     };
-    m.appendChild(sel); g.appendChild(m);
+    m.appendChild(sel);
+    var ed = el('button', 'mini', '✏️'); ed.title = 'Editar nombre o curso'; ed.onclick = function () { A.editando = a.id; pintarEquipos(); };
+    var bo = el('button', 'mini', '🗑'); bo.title = 'Quitar de la lista';
+    bo.onclick = function () { confirmar('Quitar a ' + a.nombre, 'Se quitará de la lista' + (codigo ? ' de su equipo' : '') + '. El equipo y su código no cambian.', 'Quitar', function () {
+      adm('adminDeleteStudent', a.id).then(function () { A.alumnos = A.alumnos.filter(function (x) { return x.id !== a.id; }); toast(a.nombre + ' quitado/a de la lista'); pintarEquipos(); refresh(true); }).catch(function (e) { toast(clean(e)); }); }, true); };
+    m.appendChild(ed); m.appendChild(bo); g.appendChild(m);
   });
-  return g;
+  // añadir personas a este equipo sin rehacer los demás
+  var add = el('div', 'add-al');
+  var ta = el('textarea', 'f'); ta.placeholder = codigo ? 'Añadir personas a este equipo: un nombre por línea' : 'Añadir personas sin equipo: un nombre por línea'; ta.rows = 2;
+  var cs2 = selCurso(1); cs2.style.width = '150px';
+  var bt = el('button', 'btn sm primary', '＋ Añadir');
+  bt.onclick = function () {
+    var nombres = ta.value.split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean);
+    if (!nombres.length) { toast('Escribe al menos un nombre'); return; }
+    adm('adminAddStudents', codigo, Number(cs2.value), nombres).then(function (nuevos) {
+      A.alumnos = (A.alumnos || []).concat(nuevos); toast(nuevos.length === 1 ? nuevos[0].nombre + ' añadido/a' : nuevos.length + ' personas añadidas'); pintarEquipos(); refresh(true);
+    }).catch(function (e) { toast(clean(e)); });
+  };
+  add.appendChild(ta); add.appendChild(cs2); add.appendChild(bt); cont.appendChild(add);
+  return cont;
 }
 
 // ───── Formar equipos con el alumnado ─────
@@ -1045,6 +1085,10 @@ $('createTeams').onclick = function () {
   confirmar('Generar ' + n + ' equipos', 'Se sustituirán los equipos actuales y sus códigos. ¿Continuar?', 'Generar', function () {
     adm('adminCreateTeams', n).then(function () { toast(n + ' equipos creados'); cargarEquipos(); refresh(true); }).catch(function (e) { toast(clean(e)); });
   });
+};
+$('addTeam').onclick = function () {
+  adm('adminAddTeam').then(function (t) { toast(t.nombre + ' creado (código ' + t.codigo + '). Los demás equipos no cambian.'); A.abiertos = A.abiertos || {}; A.abiertos[t.codigo] = true; cargarEquipos(); refresh(true); })
+    .catch(function (e) { toast(clean(e)); });
 };
 $('delAllTeams').onclick = function () {
   confirmar('Borrar todos los equipos', 'Se borrarán TODOS los equipos, sus escaneos y mensajes, y la actividad volverá a la sala de espera. Las tarjetas impresas dejarán de funcionar.', 'Sí, borrar todo', function () {
@@ -1395,7 +1439,7 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.06-j · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.07-a · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgOrden').checked = String(c.ordenEstricto || 'si') !== 'no';
   $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';

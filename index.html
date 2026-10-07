@@ -313,7 +313,7 @@
   })();
   // Se limpia la dirección para que recargar la página no vuelva a escanear el mismo QR
   if (INIT.q || INIT.t) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
-  var VERSION_PAGINA = '2026.10.06-j';
+  var VERSION_PAGINA = '2026.10.07-a';
   var KEY = 'pdv_equipo';
   var POLL_MS = 5000;
   var S = { codigo: null, equipo: null, ver: 0, ultimoTs: -1, pantalla: null, mensajes: [], chatOpen: false, poll: null, busy: false, cola: [], seq: 0, escaneando: false };
