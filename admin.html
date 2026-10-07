@@ -452,6 +452,10 @@
         <textarea class="f" id="cfgVuelta" style="margin-bottom:12px"></textarea>
         <label class="small muted">Mensaje del reto final (al volver al Patio)</label>
         <textarea class="f" id="cfgFinal" style="margin-bottom:12px"></textarea>
+        <label class="small muted">🗝️ Pista final: dónde está escondido el cofre (aparece en la pantalla del reto final)</label>
+        <textarea class="f" id="cfgCofre" style="margin-bottom:12px" placeholder="Ej.: Donde descansa quien soñó esta casa, bajo la mirada de quien la sostiene…"></textarea>
+        <label class="small muted">👑 Indicaciones extra para la capitanía (aparecen en la sala de espera, junto a la guía)</label>
+        <textarea class="f" id="cfgCapi" style="margin-bottom:12px" placeholder="Ej.: Os reuniréis en la esquina del Patio que indique vuestro cartel de color."></textarea>
         <button class="btn primary" id="saveCfg">Guardar ajustes</button>
       </div>
       <div>
@@ -548,7 +552,7 @@ function login(pin) {
   api('adminLogin', pin).then(function (r) {
     A.pin = pin; sstore('pdv_pin', pin);
     A.version = r.version || '';
-    if (A.version !== '2026.10.07-a') setTimeout(function () { avisoVersion(A.version); }, 600);
+    if (A.version !== '2026.10.07-b') setTimeout(function () { avisoVersion(A.version); }, 600);
     // En GitHub, la página de los equipos está en la misma carpeta que este panel
     A.url = r.urlEquipos || (location.origin + location.pathname.replace(/[^\/]*$/, ''));
     $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -561,7 +565,7 @@ function login(pin) {
 function avisoVersion(v) {
   var box = $('modalBox'); box.innerHTML = '';
   box.appendChild(el('h3', '', '⚠ El motor de Apps Script no está actualizado'));
-  box.appendChild(el('p', '', 'El panel es la versión 2026.10.07-a, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
+  box.appendChild(el('p', '', 'El panel es la versión 2026.10.07-b, pero Apps Script está ejecutando ' + (v ? 'la versión ' + v : 'una versión anterior') + '. Algunas funciones (como terminar la actividad) fallarán.'));
   box.appendChild(el('p', 'muted small', 'Solución: en el editor de Apps Script, pega el Code.gs nuevo, guarda y ve a Implementar › Gestionar implementaciones › ✏️ Editar › Versión: «Nueva versión» › Implementar.'));
   var r = el('div', 'row'); r.style.justifyContent = 'flex-end'; var ok = el('button', 'btn primary', 'Entendido'); ok.onclick = cerrarModal; r.appendChild(ok); box.appendChild(r);
   $('modal').classList.remove('hidden');
@@ -1439,13 +1443,13 @@ $('cardsDrive').onclick = function () { if (!comprobarUrl()) return; $('cardsMsg
 
 // ───── Ajustes ─────
 function pintarAjustes() {
-  $('verInfo').textContent = 'Versión del panel: 2026.10.07-a · Versión del motor: ' + (A.version || 'desconocida');
+  $('verInfo').textContent = 'Versión del panel: 2026.10.07-b · Versión del motor: ' + (A.version || 'desconocida');
   var c = A.data ? A.data.config : {};
   $('cfgOrden').checked = String(c.ordenEstricto || 'si') !== 'no';
-  $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || '';
+  $('cfgAlerta').value = c.alertaMin || 10; $('cfgPatio').value = c.mensajePatio || ''; $('cfgVuelta').value = c.mensajeVuelta || ''; $('cfgFinal').value = c.mensajeFinal || ''; $('cfgCofre').value = c.pistaCofre || ''; $('cfgCapi').value = c.notaCapitania || '';
 }
 $('saveCfg').onclick = function () {
-  adm('adminSaveConfig', { ordenEstricto: $('cfgOrden').checked ? 'si' : 'no', alertaMin: Number($('cfgAlerta').value) || 10, mensajePatio: $('cfgPatio').value, mensajeVuelta: $('cfgVuelta').value, mensajeFinal: $('cfgFinal').value })
+  adm('adminSaveConfig', { ordenEstricto: $('cfgOrden').checked ? 'si' : 'no', alertaMin: Number($('cfgAlerta').value) || 10, mensajePatio: $('cfgPatio').value, mensajeVuelta: $('cfgVuelta').value, mensajeFinal: $('cfgFinal').value, pistaCofre: $('cfgCofre').value, notaCapitania: $('cfgCapi').value })
     .then(function () { toast('Ajustes guardados'); refresh(true); }).catch(function (e) { toast(clean(e)); });
 };
 $('bcSend').onclick = function () {
